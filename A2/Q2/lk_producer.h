@@ -23,5 +23,10 @@ template <class T> class producer: public sc_module
 				//do some other stuff
 			}
 		}
+
+	CT_CTOR(producer){
+		SC_THREAD(do_writes);
+		sensitive <<clock.pos();
+	}
 	
 };
