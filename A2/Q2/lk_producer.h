@@ -21,6 +21,7 @@ template <class T> class producer: public sc_module
 					cout<<"W"<<data<< " at "<<sc_time_stamp() <<endl;
 				}
 				//do some other stuff
+			data = (data + 1)%10;
 			}
 		}
 
