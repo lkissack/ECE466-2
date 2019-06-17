@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 //#define NOP 0
@@ -11,7 +12,7 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 			SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z, 
 			SC_LOGIC_Z, SC_LOGIC_Z};
 
-	SC_MODULE(lk_mem_ctrl){
+SC_MODULE(lk_mem_ctrl){
 
 	sc_inout<sc_lv<8> > data;
 	sc_in <sc_uint<8> > addr;
@@ -24,7 +25,7 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 
 	sc_lv <8> memory[256];
 
-	void do_switch(sc_uint<2> comm_s){
+	void do_switch(sc_uint<2> comm_s, sc_uint <8> addr_s, sc_lv <8> data_s){	
 		switch(comm_s){
 			case RDBYT:
 				addr_s = addr.read();//Read desired address from bus
@@ -40,7 +41,7 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 				for (int i =0; i <4; i++){
 					data_s = memory[addr_s];
 					std::cout << "@" << sc_time_stamp()<<": RDBLK-";
-					std::cout<< i <<" , address = ";
+					std::cout<< i <<", address = ";
 					std::cout <<addr_s <<", Data = "<<data_s <<std::endl;
 					wait();
 					data.write(data_s);//Alternatively, write to buffer
@@ -56,13 +57,14 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 				wait();
 				memory[addr_s] = data_s;//Put data into memory @ address
 				break;
+
 			case WTBLK: //Not originally structured with for loop - Still valid?
 				
 				addr_s = addr.read();//Read first desired address from bus
 				for( int i = 0; i < 4; i++){
 					data_s = data.read();//Read data to write from bus
 					std::cout << "@" << sc_time_stamp()<<": WTBLK-";
-					std::cout<< i <<" , address = ";
+					std::cout<< i <<", address = ";
 					std::cout <<addr_s <<", Data = "<<data_s <<std::endl;
 					wait();//After 1 clock cycle, write into memory space
 					memory[addr_s] = data_s;//Put data into memory @ address
@@ -89,7 +91,7 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 			else{
 				if(new_comm.read()==true){
 					comm_s = comm.read();
-					do_switch(comm_s);
+					do_switch(comm_s, addr_s, data_s);
 					complete.write(true);
 					while(new_comm.read()==true){
 						if(reset.read()==true){
@@ -97,9 +99,11 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 						}
 						wait();	
 					}
-					if(comm_s == RDBYT){
+					if(comm_s == RDBYT || comm_s == RDBLK){
+						cout<<"Setting data to Z"<<endl;
 						data.write(Z);
 					}
+					
 					complete.write(false);					
 				}
 					
@@ -110,7 +114,7 @@ static sc_logic Z[8] = {SC_LOGIC_Z, SC_LOGIC_Z, SC_LOGIC_Z,
 	
 	SC_CTOR(lk_mem_ctrl){
 
-		SC_THREAD(mem_process, clk.pos());
+		SC_CTHREAD(mem_process, clk.pos());
 	}
 
 };
