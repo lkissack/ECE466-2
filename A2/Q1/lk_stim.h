@@ -18,7 +18,49 @@ SC_MODULE(stim) {
 	sc_in_clk clock;
 
 	void stimgen() {
-		cout<<"Writing Byte"<<std::endl;		
+		cout<<"Verify Memory is empty before writing to it."<<endl;
+		cout<<"Reading Byte"<<endl;
+		comm.write(RDBYT);
+		addr.write(40);
+		
+		//assert new-command line
+		new_comm.write(true);
+
+		//wait for memory to respond to assertion
+		while(!complete){
+			wait();
+		}
+		//Memory is done, deassert
+		new_comm.write(false);
+		
+		//Wait for memory to respond to deassert of new_comm
+		while(complete){
+			wait();
+		}
+		cout<<"Check lines are Z:"<<data.read() <<endl;
+
+		cout<<"Reading Block"<<endl;
+		comm.write(RDBLK);
+		addr.write(100);
+		
+		//assert new-command line
+		new_comm.write(true);
+
+		//wait for memory to respond to assertion
+		while(!complete){
+			wait();
+		}
+		//Memory is done, deassert
+		new_comm.write(false);
+		
+		//Wait for memory to respond to deassert of new_comm
+		while(complete){
+			wait();
+		}
+		cout<<"Check lines are Z:"<<data.read() <<endl;
+
+
+		cout<<"Test Writing Byte"<<std::endl;		
 		comm.write(WTBYT);
 		//put address on bus
 		addr.write(40);
@@ -40,7 +82,7 @@ SC_MODULE(stim) {
 			wait();
 		}		
 
-		cout<<"Writing Block"<<endl;
+		cout<<"Test Writing Block"<<endl;
 		comm.write(WTBLK);
 		//put address on bus
 		addr.write(100);
@@ -54,7 +96,6 @@ SC_MODULE(stim) {
 		while(!complete){
 			wait();
 		}
-
 		
 		//Memory is done, deassert
 		new_comm.write(false);
@@ -64,7 +105,7 @@ SC_MODULE(stim) {
 			wait();
 		}
 
-		cout<<"Reading Byte"<<endl;
+		cout<<"Test Reading Byte"<<endl;
 		comm.write(RDBYT);
 		addr.write(40);
 		
@@ -83,14 +124,9 @@ SC_MODULE(stim) {
 			wait();
 		}
 
-		cout<<"Check lines are Z:" <<endl;
-		if(data.read() == Z){
-			cout<<"YEs"<<endl;
-		}
-		else{
-			cout<<"no"<<endl;
-		}
-		cout<<"Reading Block"<<endl;
+		cout<<"Check lines are Z:"<<data.read() <<endl;
+		
+		cout<<"Test Reading Block"<<endl;
 		comm.write(RDBLK);
 		addr.write(100);
 		
