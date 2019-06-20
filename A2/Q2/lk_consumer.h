@@ -11,6 +11,7 @@ template <class T> class consumer: public sc_module {
 
 	void do_reads(){
 		T data;
+		wait();
 		while(true){
 			if(in->read(data)){		
 				cout <<"R: "<<data <<" at "<<sc_time_stamp()<<endl;

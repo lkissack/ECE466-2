@@ -11,12 +11,9 @@ template <class T> class producer: public sc_module
 		sc_in <bool> clock;
 
 		void do_writes(){
-			//Attempt to understand why write is being triggered twice @ 0s
-			//Does same thing when connected to both clocks
-			//Mirrored version of consumer code
-			//cout<<"triggered at "<<sc_time_stamp()<<endl;
-			//wait(1, SC_NS);
 			T data = 0;
+			//Gets triggered an extra time at initialization
+			wait();
 			while(true){
 				//cout<<"triggered at "<<sc_time_stamp()<<endl;
 				if(out->write(data)){
