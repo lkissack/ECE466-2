@@ -100,7 +100,7 @@ SC_MODULE(lk_mem_ctrl){
 						wait();	
 					}
 					if(comm_s == RDBYT || comm_s == RDBLK){
-						cout<<"Setting data to Z"<<endl;
+						//cout<<"Setting data to Z"<<endl;
 						data.write(Z);
 					}
 					

@@ -37,7 +37,7 @@ SC_MODULE(stim) {
 		while(complete){
 			wait();
 		}
-		cout<<"Check lines are Z:"<<data.read() <<endl;
+		cout<<"Check lines are Z: "<<data.read() <<endl;
 
 		cout<<"Reading Block"<<endl;
 		comm.write(RDBLK);
@@ -57,7 +57,7 @@ SC_MODULE(stim) {
 		while(complete){
 			wait();
 		}
-		cout<<"Check lines are Z:"<<data.read() <<endl;
+		cout<<"Check lines are Z: "<<data.read() <<endl;
 
 
 		cout<<"Test Writing Byte"<<std::endl;		
@@ -76,6 +76,9 @@ SC_MODULE(stim) {
 		}
 		//Memory is done, deassert
 		new_comm.write(false);
+		
+		//Remove data from data bus
+		data.write(Z);
 		
 		//Wait for memory to respond to deassert of new_comm
 		while(complete){
@@ -100,6 +103,9 @@ SC_MODULE(stim) {
 		//Memory is done, deassert
 		new_comm.write(false);
 		
+		//Remove data from data bus
+		data.write(Z);
+
 		//Wait for memory to respond to deassert of new_comm
 		while(complete){
 			wait();
@@ -124,7 +130,7 @@ SC_MODULE(stim) {
 			wait();
 		}
 
-		cout<<"Check lines are Z:"<<data.read() <<endl;
+		cout<<"Data lines contain: "<<data.read() <<endl;
 		
 		cout<<"Test Reading Block"<<endl;
 		comm.write(RDBLK);
@@ -139,12 +145,13 @@ SC_MODULE(stim) {
 		}
 		//Memory is done, deassert
 		new_comm.write(false);
+
 		
 		//Wait for memory to respond to deassert of new_comm
 		while(complete){
 			wait();
 		}
-		cout<<"Check lines are Z:"<<data.read() <<endl;
+		cout<<"Data lines contain: "<<data.read() <<endl;
 		
 	}
 
