@@ -12,9 +12,10 @@ SC_MODULE(lk_multiplier) {
 		output.write(input1.read()*input2.read());
 	}
 
+	//should probably switch to clock
 	SC_CTOR(lk_multiplier) {
 		SC_METHOD(multiply);
-		sensitive << input;
+		sensitive << input1, input2;
 	}
 
 };

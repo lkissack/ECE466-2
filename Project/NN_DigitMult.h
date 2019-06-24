@@ -9,6 +9,7 @@ SC_MODULE(DigitMult){
 
 	sc_in <unsigned int> b,c;
 	sc_out <unsigned int> a;
+	sc_in_clk hardware_clock;
 
 	//sc_signal since they are used by the modules?
 	sc_signal<unsigned short int> bhigh, blow, chigh, clow, t, u;
@@ -17,7 +18,10 @@ SC_MODULE(DigitMult){
 	lk_splitter b_splitter, c_splitter;
 	//[b,c] mult 0 = blow*clow
 	lk_multiplier mult0, mult1, mult2, mult3;
-	lk_adder 
+	lk_adder add0, add1, add2, add3;
+
+	//comparator X2
+	//multiplexer to implement FSM
 
 	//another module for FSM?
 

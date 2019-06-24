@@ -9,7 +9,7 @@ SC_MODULE(lk_adder) {
 	void add() {
 		output.write(input1.read() + input2.read());
 	}
-
+//should probably switch to clock
 	SC_CTOR(lk_adder) {
 		SC_METHOD(add);
 		//sensitivities
