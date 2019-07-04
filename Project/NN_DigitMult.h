@@ -7,6 +7,10 @@
 
 SC_MODULE(DigitMult){
 
+	//Done and Enable signals for handshaking
+	sc_in <bool> enable;
+	sc_out <bool> done;
+
 	sc_in <unsigned int> b,c;
 	sc_out <unsigned int> a;
 	sc_in_clk hardware_clock;
@@ -56,5 +60,7 @@ SC_MODULE(DigitMult){
 
 	}
 
+
+	
 
 };
