@@ -29,7 +29,7 @@ SC_MODULE(lk_moore_fsm){
 	SC_CTOR(lk_moore_fsm){
 		SC_CTHREAD(state_reg, clock.pos());
 		SC_METHOD(state_diagram);
-		sensitive<<enable<<done;
+		sensitive << enable << done;
 		//This does not need to be sensitive to all of these just the important ones (tbd)
 		//
 
@@ -38,6 +38,7 @@ SC_MODULE(lk_moore_fsm){
 	void state_reg(){
 		while(1){
 			//Not sure about this
+			//And you are currently waiting?
 			if(enable && !done){
 				state.write(EXECUTE);
 			}
@@ -51,8 +52,7 @@ SC_MODULE(lk_moore_fsm){
 	void state_diagram(){
 		//perform default activities
 		//deassert muxes?
-		next_state.write(state.read());
-		
+		next_state.write(state.read());		
 
 		switch(state.read()){
 			case WAIT:
@@ -62,23 +62,28 @@ SC_MODULE(lk_moore_fsm){
 			case EXECUTE:
 				//perform multiplication
 				cout<<"Execute state"<<endl;
+				//load values into hardware
 
-				//assert done signal?
+				//Do multiplication
+
+				//assert done signal
 				done.write(true);
 				//set next state to output?
 				next_state.write(OUTPUT);
 				break;
 
-			case OUPUT:
-			cout<<"Output state" <<endl;
+			case OUTPUT:
+				cout<<"Output state" <<endl;
 				//set next state to FINISH
 				next_state.write(FINISH);
 				break;
+
 			case FINISH:
 				cout<<"Finish state"<<endl;
 				//set next state to WAIT
 				next_state.write(WAIT);
 				break;
+
 			default:
 				break;
 
