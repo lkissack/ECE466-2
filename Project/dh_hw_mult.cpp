@@ -8,7 +8,7 @@ void dh_hw_mult::fsm()
 {
 	while(1){
 
-		if(hw_mult_enable.read()==true && hw_mult_done.read()==false){
+		if(hw_mult_enable.read()==true && state.read()==WAIT){
 			state.write(EXECUTE);
 		}else{
 			state.write(next_state);
@@ -20,15 +20,56 @@ void dh_hw_mult::fsm()
 //This is where FSM will be implemented
 void dh_hw_mult::process_hw_mult()
 {
+
+//perform default activities
+	//deassert muxes?
+	next_state.write(state.read());
+
+	switch(state.read()){
+		case WAIT:
+			//don't do anything - fsm() will move to execute once enabled
+			cout<<"Wait state"<<endl;
+			break;
+		case EXECUTE:
+			//perform multiplication
+			cout<<"Execute state"<<endl;
+			//load values into hardware
+
+			//Do multiplication
+				//assert done signal
+			temp_mult();
+//Already performed in temp_mult()			
+//done.write(true);
+			//set next state to output?
+			next_state.write(OUTPUT);
+			break;
+
+		case OUTPUT:
+				cout<<"Output state" <<endl;
+				//set next state to FINISH
+				next_state.write(FINISH);
+				break;
+
+			case FINISH:
+				cout<<"Finish state"<<endl;
+				//set next state to WAIT
+				next_state.write(WAIT);
+				break;
+
+			default:
+				break;
+
+		}
+}
+
+void dh_hw_mult::temp_mult(){
+
+//ORIGINAL CODE
 	
   NN_DIGIT a[2], b, c, t, u;
   NN_HALF_DIGIT bHigh, bLow, cHigh, cLow;
-
-  while(1) {  
   
-    if (hw_mult_enable.read() == true) 
-    {	
-
+    
 	// Read inputs	
 	b = in_data_1.read();
 	c = in_data_2.read();
@@ -64,11 +105,7 @@ void dh_hw_mult::process_hw_mult()
 	}
 	hw_mult_done.write(false);
 		
-    }
 
-    wait();		// wait for a change of hw_mult_enable	
-
-  }
 	  	  
 }
 

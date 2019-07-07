@@ -20,13 +20,15 @@ sc_signal<ctrl_state> state, next_state;
   void process_hw_mult();
 
 	void fsm();
+
+	void temp_mult();
   
   SC_CTOR (dh_hw_mult)
   {
     SC_CTHREAD (fsm, hw_clock.pos());
 	//Not sure if I need to keep this thread?	
 	SC_THREAD(process_hw_mult);
-    	sensitive << hw_mult_enable;
+    	sensitive << state;
   }
   
 };
