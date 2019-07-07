@@ -4,6 +4,8 @@
 #ifndef _DH_HW_MULT_H_
 #define _DH_HW_MULT_H_ 1
 
+enum ctrl_state {WAIT, EXECUTE, OUTPUT, FINISH};
+
 SC_MODULE (dh_hw_mult)
 {
   sc_in<bool> hw_mult_enable; 
@@ -17,7 +19,7 @@ sc_in_clk hw_clock;
 
 sc_signal<ctrl_state> state, next_state;
 
-  void process_hw_mult();
+  	void process_hw_mult();
 
 	void fsm();
 
@@ -28,7 +30,7 @@ sc_signal<ctrl_state> state, next_state;
     SC_CTHREAD (fsm, hw_clock.pos());
 	//Not sure if I need to keep this thread?	
 	SC_THREAD(process_hw_mult);
-    	sensitive << state;
+    	sensitive<<state;
   }
   
 };

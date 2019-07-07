@@ -1,58 +1,65 @@
 #include "systemc.h"
 #include "digit.h"
 #include "dh_hw_mult.h"
-
-enum ctrl_state {WAIT, EXECUTE, OUTPUT, FINISH}
+#include <iomanip>
 
 void dh_hw_mult::fsm()
 {
 	while(1){
-
+		//cout<<"Current state:"<< state.read()<<endl;
 		if(hw_mult_enable.read()==true && state.read()==WAIT){
+			cout<<"Entering Execute @ "<<sc_time_stamp()<<endl;			
 			state.write(EXECUTE);
 		}else{
 			state.write(next_state);
 		}
+		//The clock will wake this thread up again
+		//cout<<"Let process have turn"<<endl;			
+		wait();
 	}
-
 }
 
 //This is where FSM will be implemented
 void dh_hw_mult::process_hw_mult()
-{
-
-//perform default activities
+{	//Need while loop, otherwise thread will die :(
+	while(1){
+	//cout<<"process hw mult"<<endl;
+	//perform default activities
 	//deassert muxes?
 	next_state.write(state.read());
 
-	switch(state.read()){
-		case WAIT:
-			//don't do anything - fsm() will move to execute once enabled
-			cout<<"Wait state"<<endl;
-			break;
-		case EXECUTE:
-			//perform multiplication
-			cout<<"Execute state"<<endl;
-			//load values into hardware
+		switch(state.read()){
+			case WAIT:
+				//don't do anything - fsm() will move to execute once enabled
+				cout<<"Wait state"<<endl;
+				break;
+			case EXECUTE:
+				//perform multiplication
+				cout<<"Execute state"<<endl;
+				//load values into hardware
 
-			//Do multiplication
-				//assert done signal
-			temp_mult();
-//Already performed in temp_mult()			
-//done.write(true);
-			//set next state to output?
-			next_state.write(OUTPUT);
-			break;
+				//Do multiplication
+					//assert done signal
+				//temp_mult();
+				//Already performed in temp_mult()			
+				hw_mult_done.write(true);
+				//set next state to output?
+				next_state.write(OUTPUT);
+				break;
 
-		case OUTPUT:
+			case OUTPUT:
 				cout<<"Output state" <<endl;
 				//set next state to FINISH
+				while(hw_mult_enable.read()==true){
+					wait();
+				}
 				next_state.write(FINISH);
 				break;
 
 			case FINISH:
 				cout<<"Finish state"<<endl;
 				//set next state to WAIT
+				hw_mult_done.write(false);
 				next_state.write(WAIT);
 				break;
 
@@ -60,6 +67,9 @@ void dh_hw_mult::process_hw_mult()
 				break;
 
 		}
+		wait();
+	}
+
 }
 
 void dh_hw_mult::temp_mult(){
@@ -103,8 +113,7 @@ void dh_hw_mult::temp_mult(){
 	while(hw_mult_enable.read() == true){
 		wait();
 	}
-	hw_mult_done.write(false);		
-
+	hw_mult_done.write(false);
 	  	  
 }
 

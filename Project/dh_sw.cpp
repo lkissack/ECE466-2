@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "dh_sw.h"
-
+#include <iomanip>
 
 static unsigned char PADDING[64] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -362,7 +362,7 @@ NN_DIGIT b,
 NN_DIGIT c
 )
 {
-
+cout<<"Digit Mult fn"<<endl;
     out_data_1.write(b);
     out_data_2.write(c);  
     hw_mult_enable.write(true);
