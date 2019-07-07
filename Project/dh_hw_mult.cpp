@@ -103,8 +103,7 @@ void dh_hw_mult::temp_mult(){
 	while(hw_mult_enable.read() == true){
 		wait();
 	}
-	hw_mult_done.write(false);
-		
+	hw_mult_done.write(false);		
 
 	  	  
 }
