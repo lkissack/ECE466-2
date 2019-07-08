@@ -6,15 +6,14 @@
 void dh_hw_mult::fsm()
 {
 	while(1){
-		//cout<<"Current state:"<< state.read()<<endl;
+		cout<<"FSM state: "<< sc_time_stamp()<<" @ "<< state.read()<<endl;
 		if(hw_mult_enable.read()==true && state.read()==WAIT){
-			cout<<"Entering Execute @ "<<sc_time_stamp()<<endl;			
+			//cout<<"Entering Execute @ "<<sc_time_stamp()<<endl;			
 			state.write(EXECUTE);
 		}else{
 			state.write(next_state);
 		}
-		//The clock will wake this thread up again
-		//cout<<"Let process have turn"<<endl;			
+		//The clock will wake this thread up again		
 		wait();
 	}
 }
@@ -24,6 +23,7 @@ void dh_hw_mult::process_hw_mult()
 {	//Need while loop, otherwise thread will die :(
 	while(1){
 	//cout<<"process hw mult"<<endl;
+
 	//perform default activities
 	//deassert muxes?
 	next_state.write(state.read());
@@ -37,11 +37,14 @@ void dh_hw_mult::process_hw_mult()
 				//perform multiplication
 				cout<<"Execute state"<<endl;
 				//load values into hardware
+				//registers b and c
+
+
+
 
 				//Do multiplication
-					//assert done signal
-				//temp_mult();
-				//Already performed in temp_mult()			
+				temp_mult();
+				//assert done signal			
 				hw_mult_done.write(true);
 				//set next state to output?
 				next_state.write(OUTPUT);
@@ -67,6 +70,7 @@ void dh_hw_mult::process_hw_mult()
 				break;
 
 		}
+		cout<<"While loop in hw process"<<endl;
 		wait();
 	}
 
@@ -79,7 +83,7 @@ void dh_hw_mult::temp_mult(){
   NN_DIGIT a[2], b, c, t, u;
   NN_HALF_DIGIT bHigh, bLow, cHigh, cLow;
   
-    
+    cout<<"Multiplication method"<<endl;
 	// Read inputs	
 	b = in_data_1.read();
 	c = in_data_2.read();
@@ -100,20 +104,18 @@ void dh_hw_mult::temp_mult(){
   
   	if ((a[0] += u) < u) a[1]++;
   	a[1] += HIGH_HALF (t);
-		
- 	// Hardware multiplication delay = 100 ns
-	//wait (100, SC_NS);
 	
 	// Write outputs
 	out_data_low.write(a[0]);
 	out_data_high.write(a[1]);
 
-	hw_mult_done.write(true);
+	//Handled by other states
+	//hw_mult_done.write(true);
 	//wait for enable to deassert
-	while(hw_mult_enable.read() == true){
+	/*while(hw_mult_enable.read() == true){
 		wait();
 	}
-	hw_mult_done.write(false);
+	hw_mult_done.write(false);*/
 	  	  
 }
 

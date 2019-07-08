@@ -1,12 +1,13 @@
 #pragma once
 #include "systemc.h"
+#include "digit.h"
 
 SC_MODULE(lk_register) {
 	//Moves input to output at clock cycle
-
-	sc_in <float> input;
+	//should make this a template
+	sc_in <NN_DIGIT> input;
 	sc_in <bool> reset;
-	sc_out <float> output;
+	sc_out <NN_DIGIT> output;
 	sc_in_clk clock;
 
 	//Updates with clock pulse - CTHREAD

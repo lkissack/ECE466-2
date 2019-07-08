@@ -367,6 +367,7 @@ cout<<"Digit Mult fn"<<endl;
     out_data_2.write(c);  
     hw_mult_enable.write(true);
     
+	//wait for hardware to complete calculation
 	while(hw_mult_done.read()==false){
 		wait();
 	}
@@ -403,9 +404,9 @@ cout<<"Digit Mult fn"<<endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
   
-    hw_mult_enable.write(false);
-    //wait(10, SC_NS);		// communication delay (10 ns)
-	while(hw_mult_done.read() ==false){
+    	hw_mult_enable.write(false);
+    	//wait for hardware to deassert
+	while(hw_mult_done.read() ==true){
 		wait();
 	}
    

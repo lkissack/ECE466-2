@@ -20,7 +20,7 @@ SC_MODULE(DigitMult){
 
 	//modules
 	lk_splitter b_splitter, c_splitter;
-	//[b,c] mult 0 = blow*clow
+	//[b,c] mult 01 = blow*chigh
 	lk_multiplier mult0, mult1, mult2, mult3;
 	lk_adder add0, add1, add2, add3;
 

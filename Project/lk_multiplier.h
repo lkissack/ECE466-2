@@ -15,7 +15,7 @@ SC_MODULE(lk_multiplier) {
 	//should probably switch to clock
 	SC_CTOR(lk_multiplier) {
 		SC_METHOD(multiply);
-		sensitive << input1, input2;
+		sensitive << input1<<input2;
 	}
 
 };
