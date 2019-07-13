@@ -1,3 +1,4 @@
+#pragma once
 #include "systemc.h"
 
 template <class T> class FIFO_READ_HS: public sc_module, public sc_fifo_in_if <T> {
@@ -24,12 +25,15 @@ template <class T> class FIFO_READ_HS: public sc_module, public sc_fifo_in_if <T
 		}
 		
 		void data_written_event(){
+
 		}
 		
-		void nb_read(T& x){
+		bool nb_read(T& x){
+			return false;
 		}
 		
 		int num_available(){
+			return 0;
 		}
 		
 };
