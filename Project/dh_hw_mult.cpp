@@ -39,11 +39,11 @@ void dh_hw_mult::process_hw_mult()
 				//load values into hardware
 				//registers b and c
 
-
+				hardware_mult();
 
 
 				//Do multiplication
-				temp_mult();
+				//temp_mult();
 				//assert done signal			
 				hw_mult_done.write(true);
 				//set next state to output?
@@ -75,6 +75,13 @@ void dh_hw_mult::process_hw_mult()
 	}
 
 }
+
+void dh_hw_mult::hardware_mult(){
+
+
+}
+
+
 
 void dh_hw_mult::temp_mult(){
 

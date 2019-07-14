@@ -9,11 +9,13 @@ SC_MODULE(lk_register) {
 	sc_in <bool> reset;
 	sc_out <NN_DIGIT> output;
 	sc_in_clk clock;
+	sc_in <bool> load_enable;
 
 	//Updates with clock pulse - CTHREAD
 	void update_register() {
 		while (1) {
-			if (reset == true) {
+			if (reset == true ||load_enable==false) {
+				//for load enable false, it might be better to output Z?
 				output.write(0);
 			}else{
 				output.write(input.read());

@@ -4,9 +4,9 @@
 
 SC_MODULE(lk_multiplier) {
 	
-	sc_in <unsigned short int> input1;
-	sc_in <unsigned short int> input2;
-	sc_out <unsigned short int> output;
+	sc_in <NN_HALF_DIGIT> input1;
+	sc_in <NN_HALF_DIGIT> input2;
+	sc_out <NN_HALF_DIGIT> output;
 
 	void multiply() {
 		output.write(input1.read()*input2.read());

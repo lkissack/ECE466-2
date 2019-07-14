@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "systemc.h"
 #include "lk_register.h"
 #include "lk_multiplier.h"
@@ -33,4 +33,4 @@ SC_MODULE(lk_datapath){
 	
 	}
 
-};
+};*/
