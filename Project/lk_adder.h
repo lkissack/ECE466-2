@@ -3,8 +3,8 @@
 
 SC_MODULE(lk_adder) {
 
-	sc_in <float_t> input1, input2;
-	sc_out <float_t> output;
+	sc_in <NN_DIGIT> input1, input2;
+	sc_out <NN_DIGIT> output;
 
 	void add() {
 		output.write(input1.read() + input2.read());

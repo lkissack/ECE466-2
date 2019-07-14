@@ -78,7 +78,7 @@ void dh_hw_mult::process_hw_mult()
 
 void dh_hw_mult::hardware_mult(){
 
-
+	reg_load_enable = true;
 }
 
 

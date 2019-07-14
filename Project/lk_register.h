@@ -21,7 +21,6 @@ SC_MODULE(lk_register) {
 				output.write(input.read());
 				//std::cout << "Reg:" << input.read()<<endl;
 			}
-			
 			wait();
 		}
 	}
