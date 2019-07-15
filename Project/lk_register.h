@@ -1,6 +1,7 @@
 #pragma once
 #include "systemc.h"
 #include "digit.h"
+#include <iomanip>
 
 SC_MODULE(lk_register) {
 	//Moves input to output at clock cycle
@@ -19,7 +20,7 @@ SC_MODULE(lk_register) {
 				output.write(0);
 			}else{
 				output.write(input.read());
-				//std::cout << "Reg:" << input.read()<<endl;
+				//cout << "Reg: " << input.read()<<endl;
 			}
 			wait();
 		}

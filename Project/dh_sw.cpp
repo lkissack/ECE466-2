@@ -362,7 +362,8 @@ NN_DIGIT b,
 NN_DIGIT c
 )
 {
-cout<<"Digit Mult fn"<<endl;
+cout << "Digit Mult fn" << endl;
+cout << "b: " << b << " c: "<< c << endl;
     out_data_1.write(b);
     out_data_2.write(c);  
     hw_mult_enable.write(true);
@@ -371,41 +372,14 @@ cout<<"Digit Mult fn"<<endl;
 	while(hw_mult_done.read()==false){
 		wait();
 	}
-
-//wait(10, SC_NS);		// communication delay (10 ns)
-        
-// This computation is now performed in hardware, taking 100 ns...
-/*
-  NN_DIGIT t, u;
-  NN_HALF_DIGIT bHigh, bLow, cHigh, cLow;
-
-  bHigh = (NN_HALF_DIGIT)HIGH_HALF (b);
-  bLow = (NN_HALF_DIGIT)LOW_HALF (b);
-  cHigh = (NN_HALF_DIGIT)HIGH_HALF (c);
-  cLow = (NN_HALF_DIGIT)LOW_HALF (c);
-
-  a[0] = (NN_DIGIT)bLow * (NN_DIGIT)cLow;
-  t = (NN_DIGIT)bLow * (NN_DIGIT)cHigh;
-  u = (NN_DIGIT)bHigh * (NN_DIGIT)cLow;
-  a[1] = (NN_DIGIT)bHigh * (NN_DIGIT)cHigh;
-  
-  if ((t += u) < u)
-    a[1] += TO_HIGH_HALF (1);
-  u = TO_HIGH_HALF (t);
-  
-  if ((a[0] += u) < u)
-    a[1]++;
-  a[1] += HIGH_HALF (t);
-*/
-
-//    wait(100, SC_NS);		// hardware multiplication delay (100 ns)
-//    wait(10, SC_NS);		// communication delay (10 ns)
-    
+    cout<< "hardware mult done"<<endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
+
+	cout<< "a[0]: " << a[0] << " a[1]: "<< a[1] << endl;
   
-    	hw_mult_enable.write(false);
-    	//wait for hardware to deassert
+  	hw_mult_enable.write(false);
+   	//wait for hardware to deassert
 	while(hw_mult_done.read() ==true){
 		wait();
 	}

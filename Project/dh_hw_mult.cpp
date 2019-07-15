@@ -6,7 +6,7 @@
 void dh_hw_mult::fsm()
 {
 	while(1){
-		cout<<"FSM state: "<< sc_time_stamp()<<" @ "<< state.read()<<endl;
+		//cout<<"FSM state: "<< sc_time_stamp()<<" @ "<< state.read()<<endl;
 		if(hw_mult_enable.read()==true && state.read()==WAIT){
 			//cout<<"Entering Execute @ "<<sc_time_stamp()<<endl;			
 			state.write(EXECUTE);
@@ -22,36 +22,49 @@ void dh_hw_mult::fsm()
 void dh_hw_mult::process_hw_mult()
 {	//Need while loop, otherwise thread will die :(
 	while(1){
-	//cout<<"process hw mult"<<endl;
-
 	//perform default activities
-	//deassert muxes?
+	
 	next_state.write(state.read());
 
 		switch(state.read()){
 			case WAIT:
 				//don't do anything - fsm() will move to execute once enabled
-				cout<<"Wait state"<<endl;
+				cout<<"WAIT"<<endl;
 				break;
+
 			case EXECUTE:
 				//perform multiplication
-				cout<<"Execute state"<<endl;
-				//load values into hardware
-				//registers b and c
+				cout<<"EXECUTE"<<endl;
+				reg_load_in_enable = true;
+				next_state.write(LOAD_IN);
+				break;
 
-				hardware_mult();
+			case LOAD_IN:
+				cout<<"LOAD_IN"<<endl;				
+				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
+				next_state.write(SELECT);
+				break;
 
+			case SELECT:				
+				cout<<"SELECT"<<endl;
+				cout<<"t: "<<t<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
+				next_state.write(LOAD_OUT);
+				//wait one clock cycle for the muxes to have to right values
+				// wait another cycle before outputting the outputs
+				break;
 
-				//Do multiplication
-				//temp_mult();
-				//assert done signal			
-				hw_mult_done.write(true);
+			case LOAD_OUT:
+				cout<<"LOAD_OUT"<<endl;
+				reg_load_out_enable = true;
+				//hw_mult_done.write(true);
+				
 				//set next state to output?
 				next_state.write(OUTPUT);
 				break;
 
 			case OUTPUT:
-				cout<<"Output state" <<endl;
+				cout<<"OUTPUT" <<endl;
+				hw_mult_done.write(true);
 				//set next state to FINISH
 				while(hw_mult_enable.read()==true){
 					wait();
@@ -60,7 +73,7 @@ void dh_hw_mult::process_hw_mult()
 				break;
 
 			case FINISH:
-				cout<<"Finish state"<<endl;
+				cout<<"FINISH"<<endl;
 				//set next state to WAIT
 				hw_mult_done.write(false);
 				next_state.write(WAIT);
@@ -70,7 +83,7 @@ void dh_hw_mult::process_hw_mult()
 				break;
 
 		}
-		cout<<"While loop in hw process"<<endl;
+		cout<<"Wait() for next state change"<<endl;
 		wait();
 	}
 
@@ -78,7 +91,7 @@ void dh_hw_mult::process_hw_mult()
 
 void dh_hw_mult::hardware_mult(){
 
-	reg_load_enable = true;
+	
 }
 
 

@@ -13,7 +13,7 @@
 #ifndef _DH_HW_MULT_H_
 #define _DH_HW_MULT_H_ 1
 
-enum ctrl_state {WAIT, EXECUTE, OUTPUT, FINISH};
+enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT, LOAD_OUT, OUTPUT, FINISH};
 
 SC_MODULE (dh_hw_mult)
 {
@@ -30,28 +30,33 @@ SC_MODULE (dh_hw_mult)
 
 	//lk_datapath datapath;
 	//Content required for data path
-	lk_register b_reg, c_reg;
+	lk_register b_reg, c_reg, alow_reg, ahigh_reg;
 	lk_splitter b_split, c_split;
 	//blow*chigh corresponds to mult 0b01
 	lk_multiplier mult0, mult1, mult2, mult3;
 
-	lk_adder add0, add1, add2, add3;
+	lk_adder add0, add1, add2, add3, add4;
 	lk_lessthan comp0, comp1;
+	//multiplexors probably need a clock	
 	lk_mux tmux, amux;
-	lk_shift tmux_shift, t_shift;
+	lk_shift tmux_shift, t_shift_up, t_shift_down;
 
 	sc_signal <NN_DIGIT> b_sig, c_sig;
 	sc_signal <NN_HALF_DIGIT> blow, bhigh, clow, chigh;
 	sc_signal <NN_DIGIT> t, alow, ahigh0, ahigh1, ahigh2, u;
+	sc_signal <NN_DIGIT> ahigh_out;//The output of alow is alow
 	sc_signal <NN_DIGIT> t_plus_u, t_plus_alow;
 	sc_signal <NN_DIGIT> tmux_out, amux_out;
-	sc_signal <NN_DIGIT> tmux_shifted, t_shifted;
+	sc_signal <NN_DIGIT> tmux_shifted, t_shifted_up;
+	sc_signal <NN_DIGIT> t_shifted_down;
 
 	//internal to hw_mult module - does not need to interact with demo
 	sc_signal <bool> reset;
-	sc_signal <bool> reg_load_enable;
+	sc_signal <bool> reg_load_in_enable;
+	sc_signal <bool> reg_load_out_enable;
 	//not sure if this should be bool or sc_logic?
 	sc_signal <bool> tmux_sel, amux_sel;
+	sc_signal <bool> left, right;
 
   	void process_hw_mult();
 
@@ -64,24 +69,25 @@ SC_MODULE (dh_hw_mult)
 	//temporary function that performs original software multiplication
 	void temp_mult();
   
-  	SC_CTOR (dh_hw_mult): 	b_reg("b_reg"), c_reg("c_reg"), b_split("b_split"), c_split("c_split"),
+  	SC_CTOR (dh_hw_mult): 	b_reg("b_reg"), c_reg("c_reg"), alow_reg("alow_reg"), ahigh_reg("ahigh_reg"),
+  							b_split("b_split"), c_split("c_split"),
 							mult0("mult0"), mult1("mult1"), mult2("mult2"), mult3("mult3"),
-							add0("add0"), add1("add1"),add2("add2"),add3("add3"),
+							add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
 							comp0("comp0"), comp1("comp1"),
 							tmux("tmux"), amux("amux"),
-							tmux_shift("tmux_shift"), t_shift("t_shift")
+							tmux_shift("tmux_shift"), t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
   	{ 
 		b_reg.input(in_data_1);
 		b_reg.output(b_sig);
 		b_reg.clock(hw_clock);
 		b_reg.reset(reset);
-		b_reg.load_enable(reg_load_enable);
+		b_reg.load_enable(reg_load_in_enable);
 
 		c_reg.input(in_data_2);
 		c_reg.output(c_sig);
 		c_reg.clock(hw_clock);
 		c_reg.reset(reset);
-		c_reg.load_enable(reg_load_enable);
+		c_reg.load_enable(reg_load_in_enable);
 
 		b_split.input(b_sig);
 		b_split.low(blow);
@@ -118,36 +124,61 @@ SC_MODULE (dh_hw_mult)
 
 		tmux.sel(tmux_sel);
 		tmux.out(tmux_out);
+		tmux.clock(hw_clock);
 		
 		tmux_shift.input(tmux_out);
+		//Not sure if this is a reasonable hardware module
+		tmux_shift.direction(left);
 		tmux_shift.output(tmux_shifted);
 
 		add1.input1(ahigh0);
 		add1.input2(tmux_shifted);
 		add1.output(ahigh1);
 
-		t_shift.input(t);
-		t_shift.output(t_shifted);
+		t_shift_up.input(t);
+		t_shift_up.direction(left);
+		t_shift_up.output(t_shifted_up);
 
-		add2.input1(t_shifted);
+		add2.input1(t_shifted_up);
 		add2.input2(alow);
 		add2.output(t_plus_alow);
 
 		comp1.input1(t_plus_alow);
-		comp1.input2(t_shifted);
+		comp1.input2(t_shifted_up);
 		comp1.output(amux_sel);
 		
 		amux.sel(amux_sel);
 		amux.out(amux_out);
+		amux.clock(hw_clock);
 
 		add3.input1(ahigh1);
 		add3.input2(amux_out);
 		add3.output(ahigh2);
+		
+		t_shift_down.input(t);
+		t_shift_down.direction(right);
+		t_shift_down.output(t_shifted_down);
+		
+		add4.input1(ahigh2);
+		add4.input2(t_shifted_down);
+		add4.output(ahigh_out);
+		
+		ahigh_reg.input(ahigh_out);
+		ahigh_reg.output(out_data_high);
+		ahigh_reg.reset(reset);
+		ahigh_reg.clock(hw_clock);
+		ahigh_reg.load_enable(reg_load_out_enable);
+		
+		alow_reg.input(alow);
+		alow_reg.output(out_data_low);
+		alow_reg.reset(reset);
+		alow_reg.clock(hw_clock);
+		alow_reg.load_enable(reg_load_out_enable);
 
-		//need to implement add4
-		//need to get the high half of t for it
-
-		reg_load_enable = false;
+		reg_load_in_enable = false;
+		reg_load_out_enable = false;
+		left = true;
+		right = false;
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	

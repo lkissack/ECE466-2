@@ -9,7 +9,13 @@ SC_MODULE(lk_multiplier) {
 	sc_out <NN_DIGIT> output;
 
 	void multiply() {
-		output.write(((NN_DIGIT)input1.read())*((NN_DIGIT)input2.read()));
+		NN_DIGIT x = (NN_DIGIT)input1.read();
+		NN_DIGIT y = (NN_DIGIT)input2.read();
+		output.write(x*y);
+		/*cout<<"multiply"<<endl;
+		cout<<"input1: "<< x<<endl;
+		cout<<"input2: "<< y<<endl;
+		cout<<"output: "<< x*y<<endl;*/
 	}
 
 	//should probably switch to clock
