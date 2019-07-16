@@ -19,7 +19,7 @@ SC_MODULE(lk_shift) {
 			out = in >>16;
 		}
 		output.write(out);
-		cout<<"Shift: "<<input.read()<<endl;
+		cout<<"Shift: "<<input.read()<<" direction: "<<direction.read()<<endl;
 		cout<<"output: "<< out<<endl;
 	}
 //should probably switch to clock

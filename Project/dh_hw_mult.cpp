@@ -25,7 +25,7 @@ void dh_hw_mult::fsm_transition()
 {
 	while(1){
 	//cout<<"FSM TRANSITION"<<endl;
-	next_state.write(state.read());
+		next_state.write(state.read());
 		switch(state.read()){
 			case WAIT:
 				cout<<"WAIT"<<endl;
@@ -96,7 +96,7 @@ void dh_hw_mult::fsm_transition()
 				break;
 		}//end of switch
 		wait();
-		}
+	}
 }
 
 //This function implements the behaviour on the datapath based on the FSM
