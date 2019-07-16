@@ -7,58 +7,82 @@ void dh_hw_mult::fsm()
 {
 	while(1){
 	//add some condition for a reset
-	
+		//cout<<"FSM"<<endl;
 		//need extra check here since the state won't change once WAIT is entered
-		if(hw_mult_enable.read() == true){
+		/*if(hw_mult_enable.read() == true){
 			state.write(EXECUTE);
 		}
 		else{
 			state.write(next_state.read());	
-		}
+		}*/
+		state.write(next_state.read());
 		wait();
 	}
 }
 
+//This might need to be a clock thread
 void dh_hw_mult::fsm_transition()
 {
+	while(1){
+	//cout<<"FSM TRANSITION"<<endl;
 	next_state.write(state.read());
 		switch(state.read()){
 			case WAIT:
+				cout<<"WAIT"<<endl;
+				//Software asserts enable
 				if(hw_mult_enable.read() == true){
-					next_state = EXECUTE;
+					next_state.write(EXECUTE);
 				}
 				break;
-				
-			case EXECUTE:
+			
+			//not sure if this should contain anything or just drop in load in?	
+			case EXECUTE:				
+				cout<<"EXECUTE"<<endl;
 				/*while(reg_load_in_enable.read()==false){
 					wait();
-				}
-				next_state.write(LOAD_IN);*/
-				if(reg_load_in_enable.read()==true){
+				}*/
+				//Enable registers to start
+				if(reg_load_in_enable.read()==true){					
 					next_state.write(LOAD_IN);
+				}								
+				break;
+			
+			case LOAD_IN:			
+				cout<<"LOAD_IN"<<endl;
+				if(reg_load_in_enable.read()==true){					
+					next_state.write(SELECT);
 				}
 				break;
 			
-			case LOAD_IN:
-				next_state.write(SELECT);
-			
-			case SELECT:
+			//Do some stuff with the mulitplexors
+			case SELECT:						
+				cout<<"SELECT"<<endl;
 				next_state.write(LOAD_OUT);
+				break;
 			
-			case LOAD_OUT:
-				next_state.write(OUTPUT);
+			//wait for the output registers to be enabled
+			case LOAD_OUT:			
+				cout<<"LOAD_OUT"<<endl;
+				if(reg_load_out_enable.read() == true){
+					next_state.write(OUTPUT);
+				}
+				break;
 			
-			case OUTPUT:
+			//wait for software to deassert the enable	
+			case OUTPUT:			
+				cout<<"OUTPUT" <<endl;
 				/*while(hw_mult_enable.read()==true){
 					wait();
 				}
 				next_state.write(FINISH);*/
-				if(hw_mult_enable.read()==true){
+				if(hw_mult_enable.read()==false){
 					next_state.write(FINISH);
 				}
 				break;
 			
-			case FINISH:				
+			//wait for hardware to deassert done
+			case FINISH:
+				cout<<"FINISH"<<endl;				
 				/*while(hw_mult_done.read() == true){
 					wait();
 				}
@@ -71,6 +95,8 @@ void dh_hw_mult::fsm_transition()
 			default:
 				break;
 		}//end of switch
+		wait();
+		}
 }
 
 //This function implements the behaviour on the datapath based on the FSM
@@ -86,17 +112,15 @@ void dh_hw_mult::process_hw_mult()
 		switch(state.read()){
 			case WAIT:
 				//don't do anything
-				cout<<"WAIT"<<endl;
+				
 				break;
 
 			case EXECUTE:
 				//perform multiplication
-				cout<<"EXECUTE"<<endl;
 				reg_load_in_enable.write(true);				
 				break;
 
-			case LOAD_IN:
-				cout<<"LOAD_IN"<<endl;				
+			case LOAD_IN:				
 				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
 				if(t_plus_u.read() < u.read()){
 					tmux_sel.write(true);
@@ -106,8 +130,7 @@ void dh_hw_mult::process_hw_mult()
 				}
 				break;
 
-			case SELECT:				
-				cout<<"SELECT"<<endl;
+			case SELECT:	
 				cout<<"t: "<<t<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				//set values of multiplexors? - same as GCD, but already implemented in datapath?
 				//wait one clock cycle for the muxes to have to right values
@@ -115,20 +138,18 @@ void dh_hw_mult::process_hw_mult()
 				break;
 
 			case LOAD_OUT:
-				cout<<"LOAD_OUT"<<endl;
 				reg_load_out_enable = true;
 				//hw_mult_done.write(true);
 				
 				break;
 
 			case OUTPUT:
-				cout<<"OUTPUT" <<endl;
 				hw_mult_done.write(true);
 				
 				break;
 
 			case FINISH:
-				cout<<"FINISH"<<endl;
+				cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
 				break;
 

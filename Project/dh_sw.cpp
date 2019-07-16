@@ -372,7 +372,7 @@ cout << "b: " << b << " c: "<< c << endl;
 	while(hw_mult_done.read()==false){
 		wait();
 	}
-    cout<< "hardware mult done"<<endl;
+    cout<< "Hardware multiplication values generated."<<endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
 
@@ -380,9 +380,11 @@ cout << "b: " << b << " c: "<< c << endl;
   
   	hw_mult_enable.write(false);
    	//wait for hardware to deassert
-	while(hw_mult_done.read() ==true){
+	while(hw_mult_done.read() == true){
 		wait();
 	}
+	
+	cout<<"Hardware multiplication finished"<<endl;
    
 }
 

@@ -184,8 +184,8 @@ SC_MODULE (dh_hw_mult)
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
-		SC_METHOD(fsm_transition);
-		sensitive<<state;
+		SC_CTHREAD(fsm_transition, hw_clock.pos());
+		//sensitive<<state;
 		SC_METHOD(process_hw_mult);
     	sensitive<<state<<tmux_sel<<amux_sel;
  	}
