@@ -9,10 +9,12 @@ SC_MODULE(lk_mux){
 	sc_in <bool> sel;//should this be sc_logic?
 	sc_out <NN_DIGIT> out;
 	sc_in_clk clock;
+	//sc_in <bool> enable;
 
 	void mux_process(){
-	//SC_LOGIC_1
-		if(sel.read()==true){
+	//SC_LOGIC_1?
+		//if(sel.read()==true && enable.read()==true){
+		if(sel.read()==true ){
 			out.write(1);
 		}
 		else{

@@ -6,49 +6,110 @@
 void dh_hw_mult::fsm()
 {
 	while(1){
-		//cout<<"FSM state: "<< sc_time_stamp()<<" @ "<< state.read()<<endl;
-		if(hw_mult_enable.read()==true && state.read()==WAIT){
-			//cout<<"Entering Execute @ "<<sc_time_stamp()<<endl;			
+	//add some condition for a reset
+	
+		//need extra check here since the state won't change once WAIT is entered
+		if(hw_mult_enable.read() == true){
 			state.write(EXECUTE);
-		}else{
-			state.write(next_state);
 		}
-		//The clock will wake this thread up again		
+		else{
+			state.write(next_state.read());	
+		}
 		wait();
 	}
 }
 
-//This is where FSM will be implemented
+void dh_hw_mult::fsm_transition()
+{
+	next_state.write(state.read());
+		switch(state.read()){
+			case WAIT:
+				if(hw_mult_enable.read() == true){
+					next_state = EXECUTE;
+				}
+				break;
+				
+			case EXECUTE:
+				/*while(reg_load_in_enable.read()==false){
+					wait();
+				}
+				next_state.write(LOAD_IN);*/
+				if(reg_load_in_enable.read()==true){
+					next_state.write(LOAD_IN);
+				}
+				break;
+			
+			case LOAD_IN:
+				next_state.write(SELECT);
+			
+			case SELECT:
+				next_state.write(LOAD_OUT);
+			
+			case LOAD_OUT:
+				next_state.write(OUTPUT);
+			
+			case OUTPUT:
+				/*while(hw_mult_enable.read()==true){
+					wait();
+				}
+				next_state.write(FINISH);*/
+				if(hw_mult_enable.read()==true){
+					next_state.write(FINISH);
+				}
+				break;
+			
+			case FINISH:				
+				/*while(hw_mult_done.read() == true){
+					wait();
+				}
+				next_state.write(WAIT);*/
+				if(hw_mult_done.read() == false){
+					next_state.write(WAIT);
+				}
+				break;
+				
+			default:
+				break;
+		}//end of switch
+}
+
+//This function implements the behaviour on the datapath based on the FSM
+//It does NOT determine the next state
 void dh_hw_mult::process_hw_mult()
-{	//Need while loop, otherwise thread will die :(
-	while(1){
+{	
 	//perform default activities
 	
-	next_state.write(state.read());
+	//currently handled by its own module - GCD shows mealy as controlling
+	//tmux_sel.write(false);
+	//amux_sel.write(false);
 
 		switch(state.read()){
 			case WAIT:
-				//don't do anything - fsm() will move to execute once enabled
+				//don't do anything
 				cout<<"WAIT"<<endl;
 				break;
 
 			case EXECUTE:
 				//perform multiplication
 				cout<<"EXECUTE"<<endl;
-				reg_load_in_enable = true;
-				next_state.write(LOAD_IN);
+				reg_load_in_enable.write(true);				
 				break;
 
 			case LOAD_IN:
 				cout<<"LOAD_IN"<<endl;				
 				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
-				next_state.write(SELECT);
+				if(t_plus_u.read() < u.read()){
+					tmux_sel.write(true);
+				}
+				if(t_plus_alow.read() < t_shifted_up.read()){
+					amux_sel.write(true);
+				}
 				break;
 
 			case SELECT:				
 				cout<<"SELECT"<<endl;
 				cout<<"t: "<<t<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
-				next_state.write(LOAD_OUT);
+				//set values of multiplexors? - same as GCD, but already implemented in datapath?
 				//wait one clock cycle for the muxes to have to right values
 				// wait another cycle before outputting the outputs
 				break;
@@ -58,25 +119,17 @@ void dh_hw_mult::process_hw_mult()
 				reg_load_out_enable = true;
 				//hw_mult_done.write(true);
 				
-				//set next state to output?
-				next_state.write(OUTPUT);
 				break;
 
 			case OUTPUT:
 				cout<<"OUTPUT" <<endl;
 				hw_mult_done.write(true);
-				//set next state to FINISH
-				while(hw_mult_enable.read()==true){
-					wait();
-				}
-				next_state.write(FINISH);
+				
 				break;
 
 			case FINISH:
 				cout<<"FINISH"<<endl;
-				//set next state to WAIT
 				hw_mult_done.write(false);
-				next_state.write(WAIT);
 				break;
 
 			default:
@@ -84,8 +137,6 @@ void dh_hw_mult::process_hw_mult()
 
 		}
 		cout<<"Wait() for next state change"<<endl;
-		wait();
-	}
 
 }
 

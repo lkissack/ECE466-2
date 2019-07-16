@@ -36,7 +36,7 @@ SC_MODULE (dh_hw_mult)
 	lk_multiplier mult0, mult1, mult2, mult3;
 
 	lk_adder add0, add1, add2, add3, add4;
-	lk_lessthan comp0, comp1;
+	//lk_lessthan comp0, comp1;
 	//multiplexors probably need a clock	
 	lk_mux tmux, amux;
 	lk_shift tmux_shift, t_shift_up, t_shift_down;
@@ -65,6 +65,8 @@ SC_MODULE (dh_hw_mult)
 	void hardware_mult();
 
 	void fsm();
+	
+	void fsm_transition();
 
 	//temporary function that performs original software multiplication
 	void temp_mult();
@@ -73,7 +75,7 @@ SC_MODULE (dh_hw_mult)
   							b_split("b_split"), c_split("c_split"),
 							mult0("mult0"), mult1("mult1"), mult2("mult2"), mult3("mult3"),
 							add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
-							comp0("comp0"), comp1("comp1"),
+							//comp0("comp0"), comp1("comp1"),
 							tmux("tmux"), amux("amux"),
 							tmux_shift("tmux_shift"), t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
   	{ 
@@ -118,9 +120,9 @@ SC_MODULE (dh_hw_mult)
 		add0.output(t_plus_u);
 
 		//order of inputs matters
-		comp0.input1(t_plus_u);
+		/*comp0.input1(t_plus_u);
 		comp0.input2(u);
-		comp0.output(tmux_sel);
+		comp0.output(tmux_sel);*/
 
 		tmux.sel(tmux_sel);
 		tmux.out(tmux_out);
@@ -143,9 +145,9 @@ SC_MODULE (dh_hw_mult)
 		add2.input2(alow);
 		add2.output(t_plus_alow);
 
-		comp1.input1(t_plus_alow);
+		/*comp1.input1(t_plus_alow);
 		comp1.input2(t_shifted_up);
-		comp1.output(amux_sel);
+		comp1.output(amux_sel);*/
 		
 		amux.sel(amux_sel);
 		amux.out(amux_out);
@@ -182,8 +184,10 @@ SC_MODULE (dh_hw_mult)
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
-		SC_THREAD(process_hw_mult);
-    	sensitive<<state;
+		SC_METHOD(fsm_transition);
+		sensitive<<state;
+		SC_METHOD(process_hw_mult);
+    	sensitive<<state<<tmux_sel<<amux_sel;
  	}
   
 };

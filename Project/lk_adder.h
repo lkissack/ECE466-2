@@ -1,5 +1,6 @@
 #pragma once
 #include "systemc.h"
+#include <iomanip>
 
 SC_MODULE(lk_adder) {
 
@@ -7,7 +8,12 @@ SC_MODULE(lk_adder) {
 	sc_out <NN_DIGIT> output;
 
 	void add() {
-		output.write(input1.read() + input2.read());
+		NN_DIGIT out = input1.read() + input2.read();
+		output.write(out);
+		/*
+		cout<<"adder"<<endl;
+		cout<<"in: "<<input1.read()<<" + "<<input2.read()<<endl;
+		cout<<"out: "<<out<<endl;*/
 	}
 //should probably switch to clock
 	SC_CTOR(lk_adder) {
