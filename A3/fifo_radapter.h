@@ -1,5 +1,6 @@
 #pragma once
 #include "systemc.h"
+#include <iomanip>
 
 template <class T> class FIFO_READ_HS: public sc_module, public sc_fifo_in_if <T> {
 	public:    
@@ -7,7 +8,9 @@ template <class T> class FIFO_READ_HS: public sc_module, public sc_fifo_in_if <T
 		sc_in <T> data;    
 		sc_in <bool> valid;    
 		sc_out <bool> ready;   
-		void read (T& x) {
+		
+		virtual void read (T& x) {
+			cout<<"read hw fifo"<<endl;
 			// blocking read        
 			ready.write (true); 
 			// signal that ready to consume data        
@@ -18,22 +21,25 @@ template <class T> class FIFO_READ_HS: public sc_module, public sc_fifo_in_if <T
 			// read data, stop consumption for now    
 		}    
 		
-		SC_CTOR (FIFO_READ_HS) {  ready.initialize (false);  }
-		// Here, provide dummy implementations for unneeded sc_fifo_in_if <T> methods
+		virtual T read() {
+        T tmp;
+        read(tmp);
+        return tmp;
+   		}
 		
-		T read(){
-		}
-		
-		void data_written_event(){
+		// sc_fifo_out_if<T> methods:
+		bool nb_read(T&)
+		{ assert(0); return false; }
 
-		}
-		
-		bool nb_read(T& x){
-			return false;
-		}
-		
-		int num_available(){
-			return 0;
+		int num_available() const
+		{ assert(0); return 0; }
+
+		const sc_event& data_written_event() const
+		{ static sc_event dummy; assert(0); return dummy; }
+
+		// constructor
+		SC_CTOR(FIFO_READ_HS) {
+		    ready.initialize(false);
 		}
 		
 };

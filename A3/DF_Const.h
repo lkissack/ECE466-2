@@ -1,9 +1,11 @@
 #include "systemc.h"
+#include <iomanip>
 
 template <class T> SC_MODULE (DF_Const) {     
 	sc_fifo_out	<T> output;    
 	
 	void process() { 
+		cout<<"Const process: "<< constant_<<endl;
 		while (1) output.write(constant_); 
 	} 
 	   

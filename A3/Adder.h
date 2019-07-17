@@ -1,14 +1,21 @@
 #include "systemc.h"
-
+#include <iomanip>
 
 template <class T> SC_MODULE (Adder) {     
 	sc_fifo_in <T> input1, input2;    
 	sc_out <T> output;  
 	sc_in_clk clock;
-	sc_out <bool> valid, ready;
+	sc_out <bool> valid;
+	sc_in <bool>ready;
 	  
-	void source_process() { 
-		while (1) output.write(input1.read() + input2.read()); 
+	void process() { 
+		while (1) {
+			
+			output.write(input1.read() + input2.read()); 
+			cout<<"adder process"<<endl;
+			cout<<"in1: "<<input1.read()<<endl;
+			cout<<" in2: "<<input2.read()<<endl;
+		}
 	}   
 
 	void write(const int& x){
@@ -22,6 +29,6 @@ template <class T> SC_MODULE (Adder) {
 	}  
 	
 	SC_CTOR (Adder) { 
-		SC_THREAD(source_process); 
+		SC_THREAD(process); 
 	} 
 }; 
