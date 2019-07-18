@@ -13,8 +13,8 @@
 #ifndef _DH_HW_MULT_H_
 #define _DH_HW_MULT_H_ 1
 
-enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT, LOAD_OUT, OUTPUT, FINISH};
-enum ctrl_mux_state {A0T0, A0T1, A1T0, A1T1};
+enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT,A0T0, A0T1, A1T0, A1T1, LOAD_OUT, OUTPUT, FINISH};
+//enum ctrl_mux_state {A0T0, A0T1, A1T0, A1T1};
 
 SC_MODULE (dh_hw_mult)
 {
@@ -28,7 +28,7 @@ SC_MODULE (dh_hw_mult)
 	sc_in_clk hw_clock;
 
 	sc_signal<ctrl_state> state, next_state;
-	sc_signal<ctrl_mux_state> mux_state, next_mux_state;
+	//sc_signal<ctrl_mux_state> mux_state, next_mux_state;
 
 	//lk_datapath datapath;
 	//Content required for data path
@@ -185,15 +185,16 @@ SC_MODULE (dh_hw_mult)
 		reg_load_out_enable.write(SC_LOGIC_0);
 		left = true;
 		right = false;
+		reset.write(false);
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
 		//SC_CTHREAD(fsm_transition, hw_clock.pos());
 		SC_METHOD(fsm_transition);
-		//Sensitive to state, enable, done,
-		sensitive << state<< hw_mult_enable<< hw_mult_done << a_GT << a_LTE<< t_GT<< t_LTE;
+		//Sensitive to state, enable, done (should this be here?),
+		sensitive << state << hw_mult_enable<< hw_mult_done<<a_GT << a_LTE<< t_GT<< t_LTE;
 		SC_METHOD(fsm_out);
-    		sensitive<<state<<tmux_sel<<amux_sel;
+    		sensitive << state;
  	}
   
 };

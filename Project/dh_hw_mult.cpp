@@ -7,16 +7,9 @@ void dh_hw_mult::fsm()
 {
 	while(1){
 	//add some condition for a reset
-		//cout<<"FSM"<<endl;
-		//need extra check here since the state won't change once WAIT is entered
-		/*if(hw_mult_enable.read() == true){
-			state.write(EXECUTE);
-		}
-		else{
-			state.write(next_state.read());	
-		}*/
+		//cout<<"FSM"<<endl;		
 		state.write(next_state.read());
-		mux_state.write(next_mux_state.read());
+		//mux_state.write(next_mux_state.read());
 		wait();
 	}
 }
@@ -26,10 +19,10 @@ void dh_hw_mult::fsm_transition()
 {
 	//cout<<"FSM TRANSITION"<<endl;
 		next_state.write(state.read());
-		next_mux_state.write(mux_state.read());
+		//next_mux_state.write(mux_state.read());
 		switch(state.read()){
 			case WAIT:
-				cout<<"WAIT"<<endl;
+				cout<<"WAIT transition"<<endl;
 				//Software asserts enable
 				if(hw_mult_enable.read() == true){
 					next_state.write(EXECUTE);
@@ -38,31 +31,42 @@ void dh_hw_mult::fsm_transition()
 			
 			//not sure if this should contain anything or just drop in load in?	
 			case EXECUTE:				
-				cout<<"EXECUTE"<<endl;
+				cout<<"EXECUTE transition"<<endl;
 				next_state.write(LOAD_IN);								
 				break;
 			
 			case LOAD_IN:			
-				cout<<"LOAD_IN"<<endl;
+				cout<<"LOAD_IN transition"<<endl;
 				next_state.write(SELECT);
 				break;
 			
 			//Do some stuff with the mulitplexors
 			case SELECT:						
-				cout<<"SELECT"<<endl;
+				cout<<"SELECT transition"<<endl;
 				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_0){
-					next_mux_state.write(A0T0);
+					//next_mux_state.write(A0T0);
+					next_state.write(A0T0);
 				}
 				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_1){
-					next_mux_state.write(A0T1);
+					//next_mux_state.write(A0T1);
+					next_state.write(A0T1);
 				}
 				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_0){
-					next_mux_state.write(A1T0);
+					//next_mux_state.write(A1T0);
+					next_state.write(A1T0);
 				}
 				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_1){
-					next_mux_state.write(A1T1);
+					//next_mux_state.write(A1T1);
+					next_state.write(A1T1);
 				}
 			
+				//next_state.write(LOAD_OUT);
+				break;
+				
+			case A0T0:
+			case A0T1:
+			case A1T0:
+			case A1T1:
 				next_state.write(LOAD_OUT);
 				break;
 			
@@ -74,7 +78,7 @@ void dh_hw_mult::fsm_transition()
 			
 			//wait for software to deassert the enable	
 			case OUTPUT:			
-				cout<<"OUTPUT" <<endl;
+				cout<<"OUTPUT transition" <<endl;
 				if(hw_mult_enable.read()==false){
 					next_state.write(FINISH);
 				}
@@ -82,7 +86,7 @@ void dh_hw_mult::fsm_transition()
 			
 			//wait for hardware to deassert done
 			case FINISH:
-				cout<<"FINISH"<<endl;
+				cout<<"FINISH transition"<<endl;
 				next_state.write(WAIT);
 				break;
 				
@@ -99,8 +103,8 @@ void dh_hw_mult::fsm_out()
 	//perform default activities
 	
 	//currently handled by its own module - GCD shows mealy as controlling
-	tmux_sel.write(SC_LOGIC_0);
-	amux_sel.write(SC_LOGIC_0);
+	//tmux_sel.write(SC_LOGIC_0);
+	//amux_sel.write(SC_LOGIC_0);
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
 	//reset.write(false);
@@ -116,44 +120,79 @@ void dh_hw_mult::fsm_out()
 				reg_load_in_enable.write(SC_LOGIC_1);				
 				break;
 
-			case LOAD_IN:				
+			case LOAD_IN:
+				cout<<"LOAD_IN output"<<endl;				
 				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
-				/*if(t_plus_u.read() < u.read()){
-					tmux_sel.write(true);
-				}
-				if(t_plus_alow.read() < t_shifted_up.read()){
-					amux_sel.write(true);
-				}*/
+				
+				//cout<<"t+u: "<< t_plus_u<< " u: "<<u<<endl;
 				break;
 
-			case SELECT:	
-				cout<<"t + u: "<<t_plus_u<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
-				switch(mux_state.read()){
+			case SELECT:
+				cout<<"SELECT output"<<endl;	
+				cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
+				cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
+				cout<<"data out low: "<<out_data_low<<endl;
+				/*switch(mux_state.read()){
 					case A0T0:
-						//handled by default
+						cout<<"A0T0"<<endl;
+						tmux_sel.write(SC_LOGIC_0);
+						amux_sel.write(SC_LOGIC_0);
 						break;
 					case A0T1:
+						cout<<"A0T1"<<endl;
 						amux_sel.write(SC_LOGIC_0);
 						tmux_sel.write(SC_LOGIC_1);
+						break;
 					case A1T0:
+						cout<<"A1T0"<<endl;
 						amux_sel.write(SC_LOGIC_1);
 						tmux_sel.write(SC_LOGIC_0);
+						break;
 					case A1T1:
+						cout<<"A1T1"<<endl;
 						amux_sel.write(SC_LOGIC_1);
 						tmux_sel.write(SC_LOGIC_1);
+						break;
 					default:
 						break;
-				}			
+				}		*/	
 
 				break;
+				
+			case A0T0:
+						cout<<"A0T0"<<endl;
+						tmux_sel.write(SC_LOGIC_0);
+						amux_sel.write(SC_LOGIC_0);
+						break;
+					case A0T1:
+						cout<<"A0T1"<<endl;
+						amux_sel.write(SC_LOGIC_0);
+						tmux_sel.write(SC_LOGIC_1);
+						break;
+					case A1T0:
+						cout<<"A1T0"<<endl;
+						amux_sel.write(SC_LOGIC_1);
+						tmux_sel.write(SC_LOGIC_0);
+						break;
+					case A1T1:
+						cout<<"A1T1"<<endl;
+						amux_sel.write(SC_LOGIC_1);
+						tmux_sel.write(SC_LOGIC_1);
+						break;
 
 			case LOAD_OUT:
+				cout<<"LOAD_OUT output"<<endl;
+				//cout<<"data out low: "<<out_data_low<<endl;
 				reg_load_out_enable.write(SC_LOGIC_1);
-				//hw_mult_done.write(true);
 				
 				break;
 
 			case OUTPUT:
+				cout<<"OUTPUT output"<<endl;
+				cout<<"data out low: "<<out_data_low.read()<<endl;
+				//cout<<"t shifted up: "<<t_shifted_up<<endl;
+				//cout<<"t plus alow: "<<t_plus_alow<<endl;
+				reg_load_out_enable.write(SC_LOGIC_1);
 				hw_mult_done.write(true);
 				
 				break;
@@ -162,7 +201,7 @@ void dh_hw_mult::fsm_out()
 				cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
 				//clean everything up
-				reset.write(true);
+				//reset.write(true);
 				break;
 
 			default:
