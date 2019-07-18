@@ -10,7 +10,7 @@ SC_MODULE(lk_register) {
 	sc_in <bool> reset;
 	sc_out <NN_DIGIT> output;
 	sc_in_clk clock;
-	sc_in <bool> load_enable;
+	sc_in <sc_logic> load_enable;
 
 	//Updates with clock pulse - CTHREAD
 	void update_register() {

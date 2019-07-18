@@ -16,6 +16,7 @@ void dh_hw_mult::fsm()
 			state.write(next_state.read());	
 		}*/
 		state.write(next_state.read());
+		mux_state.write(next_mux_state.read());
 		wait();
 	}
 }
@@ -23,9 +24,9 @@ void dh_hw_mult::fsm()
 //This might need to be a clock thread
 void dh_hw_mult::fsm_transition()
 {
-	while(1){
 	//cout<<"FSM TRANSITION"<<endl;
 		next_state.write(state.read());
+		next_mux_state.write(mux_state.read());
 		switch(state.read()){
 			case WAIT:
 				cout<<"WAIT"<<endl;
@@ -38,43 +39,42 @@ void dh_hw_mult::fsm_transition()
 			//not sure if this should contain anything or just drop in load in?	
 			case EXECUTE:				
 				cout<<"EXECUTE"<<endl;
-				/*while(reg_load_in_enable.read()==false){
-					wait();
-				}*/
-				//Enable registers to start
-				if(reg_load_in_enable.read()==true){					
-					next_state.write(LOAD_IN);
-				}								
+				next_state.write(LOAD_IN);								
 				break;
 			
 			case LOAD_IN:			
 				cout<<"LOAD_IN"<<endl;
-				if(reg_load_in_enable.read()==true){					
-					next_state.write(SELECT);
-				}
+				next_state.write(SELECT);
 				break;
 			
 			//Do some stuff with the mulitplexors
 			case SELECT:						
 				cout<<"SELECT"<<endl;
+				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_0){
+					next_mux_state.write(A0T0);
+				}
+				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_1){
+					next_mux_state.write(A0T1);
+				}
+				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_0){
+					next_mux_state.write(A1T0);
+				}
+				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_1){
+					next_mux_state.write(A1T1);
+				}
+			
 				next_state.write(LOAD_OUT);
 				break;
 			
 			//wait for the output registers to be enabled
 			case LOAD_OUT:			
 				cout<<"LOAD_OUT"<<endl;
-				if(reg_load_out_enable.read() == true){
-					next_state.write(OUTPUT);
-				}
+				next_state.write(OUTPUT);
 				break;
 			
 			//wait for software to deassert the enable	
 			case OUTPUT:			
 				cout<<"OUTPUT" <<endl;
-				/*while(hw_mult_enable.read()==true){
-					wait();
-				}
-				next_state.write(FINISH);*/
 				if(hw_mult_enable.read()==false){
 					next_state.write(FINISH);
 				}
@@ -82,32 +82,28 @@ void dh_hw_mult::fsm_transition()
 			
 			//wait for hardware to deassert done
 			case FINISH:
-				cout<<"FINISH"<<endl;				
-				/*while(hw_mult_done.read() == true){
-					wait();
-				}
-				next_state.write(WAIT);*/
-				if(hw_mult_done.read() == false){
-					next_state.write(WAIT);
-				}
+				cout<<"FINISH"<<endl;
+				next_state.write(WAIT);
 				break;
 				
 			default:
 				break;
 		}//end of switch
-		wait();
-	}
+		
 }
 
 //This function implements the behaviour on the datapath based on the FSM
 //It does NOT determine the next state
-void dh_hw_mult::process_hw_mult()
+void dh_hw_mult::fsm_out()
 {	
 	//perform default activities
 	
 	//currently handled by its own module - GCD shows mealy as controlling
-	//tmux_sel.write(false);
-	//amux_sel.write(false);
+	tmux_sel.write(SC_LOGIC_0);
+	amux_sel.write(SC_LOGIC_0);
+	reg_load_in_enable.write(SC_LOGIC_0);
+	reg_load_out_enable.write(SC_LOGIC_0);
+	//reset.write(false);
 
 		switch(state.read()){
 			case WAIT:
@@ -117,28 +113,42 @@ void dh_hw_mult::process_hw_mult()
 
 			case EXECUTE:
 				//perform multiplication
-				reg_load_in_enable.write(true);				
+				reg_load_in_enable.write(SC_LOGIC_1);				
 				break;
 
 			case LOAD_IN:				
 				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
-				if(t_plus_u.read() < u.read()){
+				/*if(t_plus_u.read() < u.read()){
 					tmux_sel.write(true);
 				}
 				if(t_plus_alow.read() < t_shifted_up.read()){
 					amux_sel.write(true);
-				}
+				}*/
 				break;
 
 			case SELECT:	
-				cout<<"t: "<<t<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
-				//set values of multiplexors? - same as GCD, but already implemented in datapath?
-				//wait one clock cycle for the muxes to have to right values
-				// wait another cycle before outputting the outputs
+				cout<<"t + u: "<<t_plus_u<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
+				switch(mux_state.read()){
+					case A0T0:
+						//handled by default
+						break;
+					case A0T1:
+						amux_sel.write(SC_LOGIC_0);
+						tmux_sel.write(SC_LOGIC_1);
+					case A1T0:
+						amux_sel.write(SC_LOGIC_1);
+						tmux_sel.write(SC_LOGIC_0);
+					case A1T1:
+						amux_sel.write(SC_LOGIC_1);
+						tmux_sel.write(SC_LOGIC_1);
+					default:
+						break;
+				}			
+
 				break;
 
 			case LOAD_OUT:
-				reg_load_out_enable = true;
+				reg_load_out_enable.write(SC_LOGIC_1);
 				//hw_mult_done.write(true);
 				
 				break;
@@ -151,22 +161,15 @@ void dh_hw_mult::process_hw_mult()
 			case FINISH:
 				cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
+				//clean everything up
+				reset.write(true);
 				break;
 
 			default:
 				break;
 
 		}
-		cout<<"Wait() for next state change"<<endl;
-
 }
-
-void dh_hw_mult::hardware_mult(){
-
-	
-}
-
-
 
 void dh_hw_mult::temp_mult(){
 

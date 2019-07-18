@@ -362,6 +362,7 @@ NN_DIGIT b,
 NN_DIGIT c
 )
 {
+cout<<"_____________________"<<endl;
 cout << "Digit Mult fn" << endl;
 cout << "b: " << b << " c: "<< c << endl;
     out_data_1.write(b);
@@ -376,6 +377,7 @@ cout << "b: " << b << " c: "<< c << endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
 
+	cout<<"Values read by software:"<<endl;
 	cout<< "a[0]: " << a[0] << " a[1]: "<< a[1] << endl;
   
   	hw_mult_enable.write(false);

@@ -6,7 +6,7 @@
 
 SC_MODULE(lk_mux){
 
-	sc_in <bool> sel;//should this be sc_logic?
+	sc_in <sc_logic> sel;//should this be sc_logic?
 	sc_out <NN_DIGIT> out;
 	sc_in_clk clock;
 	//sc_in <bool> enable;
@@ -14,7 +14,7 @@ SC_MODULE(lk_mux){
 	void mux_process(){
 	//SC_LOGIC_1?
 		//if(sel.read()==true && enable.read()==true){
-		if(sel.read()==true ){
+		if(sel.read()==SC_LOGIC_1){
 			out.write(1);
 		}
 		else{

@@ -4,15 +4,18 @@
 SC_MODULE(lk_lessthan){
 	sc_in <NN_DIGIT> input1;
 	sc_in <NN_DIGIT> input2;
-	sc_out <bool> output;
+	sc_out <sc_logic> GT;
+	sc_out <sc_logic> LTE;
 	
 	//sets output to true if input1 is lessthan input2
 	void lessthan(){
 		if(input1 < input2){
-			output.write(true);
+			LTE.write(SC_LOGIC_1);
+			GT.write(SC_LOGIC_0);
 		}
 		else{
-			output.write(false);
+			LTE.write(SC_LOGIC_0);
+			GT.write(SC_LOGIC_1);
 		}
 	}
 	

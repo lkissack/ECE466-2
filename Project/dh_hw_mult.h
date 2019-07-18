@@ -14,12 +14,13 @@
 #define _DH_HW_MULT_H_ 1
 
 enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT, LOAD_OUT, OUTPUT, FINISH};
+enum ctrl_mux_state {A0T0, A0T1, A1T0, A1T1};
 
 SC_MODULE (dh_hw_mult)
 {
 	sc_in<bool> hw_mult_enable; 
 	sc_in<NN_DIGIT> in_data_1;
-	sc_in<NN_DIGIT> in_data_2;
+	sc_in<NN_DIGIT> in_data_2; 
 	sc_out<NN_DIGIT> out_data_low;
 	sc_out<NN_DIGIT> out_data_high;
 	sc_out<bool> hw_mult_done;
@@ -27,6 +28,7 @@ SC_MODULE (dh_hw_mult)
 	sc_in_clk hw_clock;
 
 	sc_signal<ctrl_state> state, next_state;
+	sc_signal<ctrl_mux_state> mux_state, next_mux_state;
 
 	//lk_datapath datapath;
 	//Content required for data path
@@ -52,17 +54,17 @@ SC_MODULE (dh_hw_mult)
 
 	//internal to hw_mult module - does not need to interact with demo
 	sc_signal <bool> reset;
-	sc_signal <bool> reg_load_in_enable;
-	sc_signal <bool> reg_load_out_enable;
+	sc_signal <sc_logic> reg_load_in_enable;
+	sc_signal <sc_logic> reg_load_out_enable;
 	//not sure if this should be bool or sc_logic?
-	sc_signal <bool> tmux_sel, amux_sel;
+	sc_signal <sc_logic> a_GT, a_LTE, t_GT, t_LTE;
+	
+	sc_signal <sc_logic> tmux_sel, amux_sel;
 	sc_signal <bool> left, right;
 
-  	void process_hw_mult();
+  	void fsm_out();
 
 	//function that simulates datapath - might need to be a thread for wait()s
-	//Can you have a wait within a function that is not a thread?
-	void hardware_mult();
 
 	void fsm();
 	
@@ -72,12 +74,12 @@ SC_MODULE (dh_hw_mult)
 	void temp_mult();
   
   	SC_CTOR (dh_hw_mult): 	b_reg("b_reg"), c_reg("c_reg"), alow_reg("alow_reg"), ahigh_reg("ahigh_reg"),
-  							b_split("b_split"), c_split("c_split"),
-							mult0("mult0"), mult1("mult1"), mult2("mult2"), mult3("mult3"),
-							add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
-							comp0("comp0"), comp1("comp1"),
-							tmux("tmux"), amux("amux"),
-							tmux_shift("tmux_shift"), t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
+  				b_split("b_split"), c_split("c_split"),
+				mult0("mult0"), mult1("mult1"), mult2("mult2"), mult3("mult3"),
+				add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
+				comp0("comp0"), comp1("comp1"),
+				tmux("tmux"), amux("amux"),
+				tmux_shift("tmux_shift"), t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
   	{ 
 		b_reg.input(in_data_1);
 		b_reg.output(b_sig);
@@ -122,7 +124,8 @@ SC_MODULE (dh_hw_mult)
 		//order of inputs matters
 		comp0.input1(t_plus_u);
 		comp0.input2(u);
-		comp0.output(tmux_sel);
+		comp0.GT(t_GT);
+		comp0.LTE(t_LTE);
 
 		tmux.sel(tmux_sel);
 		tmux.out(tmux_out);
@@ -137,7 +140,7 @@ SC_MODULE (dh_hw_mult)
 		add1.input2(tmux_shifted);
 		add1.output(ahigh1);
 
-		t_shift_up.input(t);
+		t_shift_up.input(t_plus_u);
 		t_shift_up.direction(left);
 		t_shift_up.output(t_shifted_up);
 
@@ -147,7 +150,8 @@ SC_MODULE (dh_hw_mult)
 
 		comp1.input1(t_plus_alow);
 		comp1.input2(t_shifted_up);
-		comp1.output(amux_sel);
+		comp1.GT(a_GT);
+		comp1.LTE(a_LTE);
 		
 		amux.sel(amux_sel);
 		amux.out(amux_out);
@@ -157,7 +161,7 @@ SC_MODULE (dh_hw_mult)
 		add3.input2(amux_out);
 		add3.output(ahigh2);
 		
-		t_shift_down.input(t);
+		t_shift_down.input(t_plus_u);
 		t_shift_down.direction(right);
 		t_shift_down.output(t_shifted_down);
 		
@@ -171,24 +175,25 @@ SC_MODULE (dh_hw_mult)
 		ahigh_reg.clock(hw_clock);
 		ahigh_reg.load_enable(reg_load_out_enable);
 		
-		alow_reg.input(alow);
+		alow_reg.input(t_plus_alow);
 		alow_reg.output(out_data_low);
 		alow_reg.reset(reset);
 		alow_reg.clock(hw_clock);
 		alow_reg.load_enable(reg_load_out_enable);
 
-		reg_load_in_enable = false;
-		reg_load_out_enable = false;
+		reg_load_in_enable.write(SC_LOGIC_0);
+		reg_load_out_enable.write(SC_LOGIC_0);
 		left = true;
 		right = false;
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
-		SC_CTHREAD(fsm_transition, hw_clock.pos());
-		//SC_METHOD(fsm_transition);
-		//sensitive<<state;
-		SC_METHOD(process_hw_mult);
-    	sensitive<<state<<tmux_sel<<amux_sel;
+		//SC_CTHREAD(fsm_transition, hw_clock.pos());
+		SC_METHOD(fsm_transition);
+		//Sensitive to state, enable, done,
+		sensitive << state<< hw_mult_enable<< hw_mult_done << a_GT << a_LTE<< t_GT<< t_LTE;
+		SC_METHOD(fsm_out);
+    		sensitive<<state<<tmux_sel<<amux_sel;
  	}
   
 };
