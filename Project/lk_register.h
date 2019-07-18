@@ -15,12 +15,15 @@ SC_MODULE(lk_register) {
 	//Updates with clock pulse - CTHREAD
 	void update_register() {
 		while (1) {
-			if (reset == true ||load_enable==false) {
-				//for load enable false, it might be better to output Z?
+			if (reset == true) {
 				output.write(0);
-			}else{
+			}
+			else if(load_enable==false){
+				//don't change the output
+			}
+			else{
 				output.write(input.read());
-				//cout << "Reg: " << input.read()<<endl;
+				cout << "Reg: " << input.read()<<endl;
 			}
 			wait();
 		}

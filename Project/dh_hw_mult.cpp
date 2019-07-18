@@ -67,6 +67,7 @@ void dh_hw_mult::fsm_transition()
 			case A0T1:
 			case A1T0:
 			case A1T1:
+				cout<<"MUX STATE transition"<<endl;
 				next_state.write(LOAD_OUT);
 				break;
 			
@@ -131,7 +132,6 @@ void dh_hw_mult::fsm_out()
 				cout<<"SELECT output"<<endl;	
 				cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
-				cout<<"data out low: "<<out_data_low<<endl;
 				/*switch(mux_state.read()){
 					case A0T0:
 						cout<<"A0T0"<<endl;
@@ -184,15 +184,14 @@ void dh_hw_mult::fsm_out()
 				cout<<"LOAD_OUT output"<<endl;
 				//cout<<"data out low: "<<out_data_low<<endl;
 				reg_load_out_enable.write(SC_LOGIC_1);
-				
 				break;
 
 			case OUTPUT:
-				cout<<"OUTPUT output"<<endl;
+				cout<<"OUTPUT output"<<endl;				
 				cout<<"data out low: "<<out_data_low.read()<<endl;
 				//cout<<"t shifted up: "<<t_shifted_up<<endl;
 				//cout<<"t plus alow: "<<t_plus_alow<<endl;
-				reg_load_out_enable.write(SC_LOGIC_1);
+				//reg_load_out_enable.write(SC_LOGIC_1);
 				hw_mult_done.write(true);
 				
 				break;
