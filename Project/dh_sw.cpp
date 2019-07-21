@@ -362,11 +362,11 @@ NN_DIGIT b,
 NN_DIGIT c
 )
 {
-cout << "Digit Mult Function" << endl;
+//cout << "Digit Mult Function" << endl;
 //cout << "DEC - b: " << b << " c: "<< c << endl;
 //cout <<hex<<"HEX - b: 0x" << b << " c: 0x"<< c <<dec<< endl;
-long mult = (long)b *(long)c;
-cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
+//long mult = (long)b *(long)c;
+//cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
     out_data_1.write(b);
     out_data_2.write(c);  
     hw_mult_enable.write(true);
@@ -375,14 +375,14 @@ cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
 	while(hw_mult_done.read()==false){
 		wait();
 	}
-    cout<< "Hardware multiplication values generated."<<endl;
+    //cout<< "Hardware multiplication values generated."<<endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
 
 	//cout<<"Values read by software:"<<endl;
 	//cout<< "a[0]: " << a[0] << " a[1]: "<< a[1] << endl;
 	
-	cout<<"Results: 0x"<<std::hex<<a[1]<<a[0]<<std::dec<<endl;
+	//cout<<"Results: 0x"<<std::hex<<a[1]<<a[0]<<std::dec<<endl;
   
   	hw_mult_enable.write(false);
    	//wait for hardware to deassert
@@ -390,8 +390,8 @@ cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
 		wait();
 	}
 	
-	cout <<"Hardware multiplication finished"<<endl;
-	cout <<"________________________________"<<endl;
+	//cout <<"Hardware multiplication finished"<<endl;
+	//cout <<"________________________________"<<endl;
    
 }
 

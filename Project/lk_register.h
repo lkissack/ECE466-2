@@ -4,8 +4,6 @@
 #include <iomanip>
 
 SC_MODULE(lk_register) {
-	//Moves input to output at clock cycle
-	//should make this a template
 	sc_in <NN_DIGIT> input;
 	sc_in <bool> reset;
 	sc_out <NN_DIGIT> output;
@@ -18,8 +16,8 @@ SC_MODULE(lk_register) {
 			if (reset == true) {
 				output.write(0);
 			}
-			else if(load_enable==false){
-				//don't change the output
+			else if(load_enable == false){
+				//maintain current output
 			}
 			else{
 				output.write(input.read());

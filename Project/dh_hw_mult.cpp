@@ -40,27 +40,31 @@ void dh_hw_mult::fsm_transition()
 				break;
 			
 			//Do some stuff with the mulitplexors
-			case SELECT:						
+			case SELECT:
+			{
+				sc_logic a_IN = a_LTE.read();
+				sc_logic t_IN = t_LTE.read();						
 				//cout<<"SELECT transition"<<endl;
-				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_0){
+				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
 					//next_mux_state.write(A0T0);
 					next_state.write(A0T0);
 				}
-				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_1){
+				else if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_1){
 					//next_mux_state.write(A0T1);
 					next_state.write(A0T1);
 				}
-				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_0){
+				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_0){
 					//next_mux_state.write(A1T0);
 					next_state.write(A1T0);
 				}
-				if(a_LTE.read()==SC_LOGIC_1 &&	t_LTE.read()==SC_LOGIC_1){
+				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
 					//next_mux_state.write(A1T1);
 					next_state.write(A1T1);
 				}
 			
 				//next_state.write(LOAD_OUT);
 				break;
+				}//BRACKETS FOR SWITCH SO VARIABLES CAN BE DEFINED
 				
 			case A0T0:
 			case A0T1:
@@ -101,16 +105,17 @@ void dh_hw_mult::fsm_transition()
 void dh_hw_mult::fsm_out()
 {	
 	//perform default activities
-	tmux_sel.write(SC_LOGIC_0);
-	amux_sel.write(SC_LOGIC_0);
+	//tmux_sel.write(SC_LOGIC_0);
+	//amux_sel.write(SC_LOGIC_0);
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
 	
-	reset.write(false);
+	
 
 		switch(state.read()){
 			case WAIT:
-				//don't do anything				
+				//don't do anything
+				reset.write(false);				
 				break;
 
 			case EXECUTE:
@@ -126,7 +131,7 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case SELECT:
-				//cout<<"SELECT output"<<endl;	
+				cout<<"SELECT output"<<endl;	
 				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
 				break;
