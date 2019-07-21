@@ -101,18 +101,16 @@ void dh_hw_mult::fsm_transition()
 void dh_hw_mult::fsm_out()
 {	
 	//perform default activities
-	
-	//currently handled by its own module - GCD shows mealy as controlling
-	//tmux_sel.write(SC_LOGIC_0);
-	//amux_sel.write(SC_LOGIC_0);
+	tmux_sel.write(SC_LOGIC_0);
+	amux_sel.write(SC_LOGIC_0);
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
-	//reset.write(false);
+	
+	reset.write(false);
 
 		switch(state.read()){
 			case WAIT:
-				//don't do anything
-				
+				//don't do anything				
 				break;
 
 			case EXECUTE:
@@ -131,53 +129,28 @@ void dh_hw_mult::fsm_out()
 				//cout<<"SELECT output"<<endl;	
 				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
-				/*switch(mux_state.read()){
-					case A0T0:
-						cout<<"A0T0"<<endl;
-						tmux_sel.write(SC_LOGIC_0);
-						amux_sel.write(SC_LOGIC_0);
-						break;
-					case A0T1:
-						cout<<"A0T1"<<endl;
-						amux_sel.write(SC_LOGIC_0);
-						tmux_sel.write(SC_LOGIC_1);
-						break;
-					case A1T0:
-						cout<<"A1T0"<<endl;
-						amux_sel.write(SC_LOGIC_1);
-						tmux_sel.write(SC_LOGIC_0);
-						break;
-					case A1T1:
-						cout<<"A1T1"<<endl;
-						amux_sel.write(SC_LOGIC_1);
-						tmux_sel.write(SC_LOGIC_1);
-						break;
-					default:
-						break;
-				}		*/	
-
 				break;
 				
 			case A0T0:
-						//cout<<"A0T0"<<endl;
-						tmux_sel.write(SC_LOGIC_0);
-						amux_sel.write(SC_LOGIC_0);
-						break;
-					case A0T1:
-						//cout<<"A0T1"<<endl;
-						amux_sel.write(SC_LOGIC_0);
-						tmux_sel.write(SC_LOGIC_1);
-						break;
-					case A1T0:
-						//cout<<"A1T0"<<endl;
-						amux_sel.write(SC_LOGIC_1);
-						tmux_sel.write(SC_LOGIC_0);
-						break;
-					case A1T1:
-						//cout<<"A1T1"<<endl;
-						amux_sel.write(SC_LOGIC_1);
-						tmux_sel.write(SC_LOGIC_1);
-						break;
+				//cout<<"A0T0"<<endl;
+				tmux_sel.write(SC_LOGIC_0);
+				amux_sel.write(SC_LOGIC_0);
+				break;
+			case A0T1:
+				//cout<<"A0T1"<<endl;
+				amux_sel.write(SC_LOGIC_0);
+				tmux_sel.write(SC_LOGIC_1);
+				break;
+			case A1T0:
+				//cout<<"A1T0"<<endl;
+				amux_sel.write(SC_LOGIC_1);
+				tmux_sel.write(SC_LOGIC_0);
+				break;
+			case A1T1:
+				//cout<<"A1T1"<<endl;
+				amux_sel.write(SC_LOGIC_1);
+				tmux_sel.write(SC_LOGIC_1);
+				break;
 
 			case LOAD_OUT:
 				//cout<<"LOAD_OUT output"<<endl;
@@ -199,7 +172,7 @@ void dh_hw_mult::fsm_out()
 				//cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
 				//clean everything up
-				//reset.write(true);
+				reset.write(true);
 				break;
 
 			default:

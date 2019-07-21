@@ -362,10 +362,9 @@ NN_DIGIT b,
 NN_DIGIT c
 )
 {
-cout <<"_____________________"<<endl;
-cout << "Digit Mult fn" << endl;
-cout << "DEC - b: " << b << " c: "<< c << endl;
-cout <<hex<<"HEX - b: 0x" << b << " c: 0x"<< c <<dec<< endl;
+cout << "Digit Mult Function" << endl;
+//cout << "DEC - b: " << b << " c: "<< c << endl;
+//cout <<hex<<"HEX - b: 0x" << b << " c: 0x"<< c <<dec<< endl;
 long mult = (long)b *(long)c;
 cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
     out_data_1.write(b);
@@ -380,8 +379,8 @@ cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
 
-	cout<<"Values read by software:"<<endl;
-	cout<< "a[0]: " << a[0] << " a[1]: "<< a[1] << endl;
+	//cout<<"Values read by software:"<<endl;
+	//cout<< "a[0]: " << a[0] << " a[1]: "<< a[1] << endl;
 	
 	cout<<"Results: 0x"<<std::hex<<a[1]<<a[0]<<std::dec<<endl;
   
@@ -391,7 +390,8 @@ cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
 		wait();
 	}
 	
-	cout<<"Hardware multiplication finished"<<endl;
+	cout <<"Hardware multiplication finished"<<endl;
+	cout <<"________________________________"<<endl;
    
 }
 

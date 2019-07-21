@@ -44,19 +44,20 @@ SC_MODULE (dh_hw_mult)
 	lk_shift tmux_shift, t_shift_up, t_shift_down;
 
 	sc_signal <NN_DIGIT> b_sig, c_sig;
+	//Splitter signals
 	sc_signal <NN_HALF_DIGIT> blow, bhigh, clow, chigh;
-	sc_signal <NN_DIGIT> t, alow, ahigh0, ahigh1, ahigh2, u;
-	sc_signal <NN_DIGIT> ahigh_out;//The output of alow is alow
-	sc_signal <NN_DIGIT> t_plus_u, t_plus_alow;
+	//Datapath signals
+	sc_signal <NN_DIGIT> t0, alow0, ahigh0, u0;
+	sc_signal <NN_DIGIT> alow1, ahigh1, ahigh2, ahigh3;
+	sc_signal <NN_DIGIT> t1;
+	sc_signal <NN_DIGIT> t1_down, t1_up;
 	sc_signal <NN_DIGIT> tmux_out, amux_out;
-	sc_signal <NN_DIGIT> tmux_shifted, t_shifted_up;
-	sc_signal <NN_DIGIT> t_shifted_down;
-
+	sc_signal <NN_DIGIT> tmux_shifted; 
+	
 	//internal to hw_mult module - does not need to interact with demo
 	sc_signal <bool> reset;
 	sc_signal <sc_logic> reg_load_in_enable;
 	sc_signal <sc_logic> reg_load_out_enable;
-	//not sure if this should be bool or sc_logic?
 	sc_signal <sc_logic> a_GT, a_LTE, t_GT, t_LTE;
 	
 	sc_signal <sc_logic> tmux_sel, amux_sel;
@@ -103,27 +104,27 @@ SC_MODULE (dh_hw_mult)
 
 		mult0.input1(blow);
 		mult0.input2(clow);
-		mult0.output(alow);
+		mult0.output(alow0);
 
 		mult1.input1(blow);
 		mult1.input2(chigh);
-		mult1.output(t);
+		mult1.output(t0);
 
 		mult2.input1(bhigh);
 		mult2.input2(clow);
-		mult2.output(u);
+		mult2.output(u0);
 
 		mult3.input1(bhigh);
 		mult3.input2(chigh);
 		mult3.output(ahigh0);
 
-		add0.input1(t);
-		add0.input2(u);
-		add0.output(t_plus_u);
+		add0.input1(t0);
+		add0.input2(u0);
+		add0.output(t1);
 
 		//order of inputs matters
-		comp0.input1(t_plus_u);
-		comp0.input2(u);
+		comp0.input1(t1);
+		comp0.input2(u0);
 		comp0.GT(t_GT);
 		comp0.LTE(t_LTE);
 
@@ -140,16 +141,16 @@ SC_MODULE (dh_hw_mult)
 		add1.input2(tmux_shifted);
 		add1.output(ahigh1);
 
-		t_shift_up.input(t_plus_u);
+		t_shift_up.input(t1);
 		t_shift_up.direction(left);
-		t_shift_up.output(t_shifted_up);
+		t_shift_up.output(t1_up);
 
-		add2.input1(t_shifted_up);
-		add2.input2(alow);
-		add2.output(t_plus_alow);
+		add2.input1(t1_up);
+		add2.input2(alow0);
+		add2.output(alow1);
 
-		comp1.input1(t_plus_alow);
-		comp1.input2(t_shifted_up);
+		comp1.input1(alow1);
+		comp1.input2(t1_up);
 		comp1.GT(a_GT);
 		comp1.LTE(a_LTE);
 		
@@ -161,21 +162,21 @@ SC_MODULE (dh_hw_mult)
 		add3.input2(amux_out);
 		add3.output(ahigh2);
 		
-		t_shift_down.input(t_plus_u);
+		t_shift_down.input(t1);
 		t_shift_down.direction(right);
-		t_shift_down.output(t_shifted_down);
+		t_shift_down.output(t1_down);
 		
 		add4.input1(ahigh2);
-		add4.input2(t_shifted_down);
-		add4.output(ahigh_out);
+		add4.input2(t1_down);
+		add4.output(ahigh3);
 		
-		ahigh_reg.input(ahigh_out);
+		ahigh_reg.input(ahigh3);
 		ahigh_reg.output(out_data_high);
 		ahigh_reg.reset(reset);
 		ahigh_reg.clock(hw_clock);
 		ahigh_reg.load_enable(reg_load_out_enable);
 		
-		alow_reg.input(t_plus_alow);
+		alow_reg.input(alow1);
 		alow_reg.output(out_data_low);
 		alow_reg.reset(reset);
 		alow_reg.clock(hw_clock);
@@ -189,12 +190,11 @@ SC_MODULE (dh_hw_mult)
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
-		//SC_CTHREAD(fsm_transition, hw_clock.pos());
 		SC_METHOD(fsm_transition);
-		//Sensitive to state, enable, done (should this be here?),
+		//Sensitive to state, enable, done, comparator results
 		sensitive << state << hw_mult_enable<< hw_mult_done<<a_GT << a_LTE<< t_GT<< t_LTE;
 		SC_METHOD(fsm_out);
-    		sensitive << state;
+    	sensitive << state;
  	}
   
 };
