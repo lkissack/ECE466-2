@@ -114,8 +114,9 @@ void dh_hw_mult::fsm_out()
 
 		switch(state.read()){
 			case WAIT:
-				//don't do anything
-				reset.write(false);				
+				//make sure reset is false
+				//reset.write(false);
+				//don't do anything				
 				break;
 
 			case EXECUTE:
@@ -131,7 +132,7 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case SELECT:
-				cout<<"SELECT output"<<endl;	
+				//cout<<"SELECT output"<<endl;	
 				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
 				break;
@@ -177,7 +178,7 @@ void dh_hw_mult::fsm_out()
 				//cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
 				//clean everything up
-				reset.write(true);
+				//reset.write(true);
 				break;
 
 			default:

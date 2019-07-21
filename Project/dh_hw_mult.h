@@ -41,7 +41,8 @@ SC_MODULE (dh_hw_mult)
 	lk_lessthan comp0, comp1;
 	//multiplexors probably need a clock	
 	lk_mux tmux, amux;
-	lk_shift tmux_shift, t_shift_up, t_shift_down;
+	lk_shift t_shift_up, t_shift_down;
+	//lk_shift tmux_shift;
 
 	sc_signal <NN_DIGIT> b_sig, c_sig;
 	//Splitter signals
@@ -52,7 +53,7 @@ SC_MODULE (dh_hw_mult)
 	sc_signal <NN_DIGIT> t1;
 	sc_signal <NN_DIGIT> t1_down, t1_up;
 	sc_signal <NN_DIGIT> tmux_out, amux_out;
-	sc_signal <NN_DIGIT> tmux_shifted; 
+	//sc_signal <NN_DIGIT> tmux_shifted; 
 	
 	//internal to hw_mult module - does not need to interact with demo
 	sc_signal <bool> reset;
@@ -60,6 +61,7 @@ SC_MODULE (dh_hw_mult)
 	sc_signal <sc_logic> reg_load_out_enable;
 	sc_signal <sc_logic> a_GT, a_LTE, t_GT, t_LTE;
 	
+	sc_signal <NN_DIGIT> tmux_in, amux_in;
 	sc_signal <sc_logic> tmux_sel, amux_sel;
 	sc_signal <bool> left, right;
 
@@ -80,7 +82,7 @@ SC_MODULE (dh_hw_mult)
 				add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
 				comp0("comp0"), comp1("comp1"),
 				tmux("tmux"), amux("amux"),
-				tmux_shift("tmux_shift"), t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
+				t_shift_up("t_shift_up"), t_shift_down("t_shift_down")//,tmux_shift("tmux_shift")
   	{ 
 		b_reg.input(in_data_1);
 		b_reg.output(b_sig);
@@ -130,15 +132,16 @@ SC_MODULE (dh_hw_mult)
 
 		tmux.sel(tmux_sel);
 		tmux.out(tmux_out);
+		tmux.in(tmux_in);
 		tmux.clock(hw_clock);
 		
-		tmux_shift.input(tmux_out);
+		/*tmux_shift.input(tmux_out);
 		//Not sure if this is a reasonable hardware module
 		tmux_shift.direction(left);
-		tmux_shift.output(tmux_shifted);
+		tmux_shift.output(tmux_shifted);*/
 
 		add1.input1(ahigh0);
-		add1.input2(tmux_shifted);
+		add1.input2(tmux_out);
 		add1.output(ahigh1);
 
 		t_shift_up.input(t1);
@@ -156,6 +159,7 @@ SC_MODULE (dh_hw_mult)
 		
 		amux.sel(amux_sel);
 		amux.out(amux_out);
+		amux.in(amux_in);
 		amux.clock(hw_clock);
 
 		add3.input1(ahigh1);
@@ -187,6 +191,8 @@ SC_MODULE (dh_hw_mult)
 		left = true;
 		right = false;
 		reset.write(false);
+		tmux_in = 1<<16;
+		amux_in = 1;
 		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
