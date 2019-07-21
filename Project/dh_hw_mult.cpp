@@ -14,7 +14,6 @@ void dh_hw_mult::fsm()
 	}
 }
 
-//This might need to be a clock thread
 void dh_hw_mult::fsm_transition()
 {
 	//cout<<"FSM TRANSITION"<<endl;
@@ -22,7 +21,7 @@ void dh_hw_mult::fsm_transition()
 		//next_mux_state.write(mux_state.read());
 		switch(state.read()){
 			case WAIT:
-				cout<<"WAIT transition"<<endl;
+				//cout<<"WAIT transition"<<endl;
 				//Software asserts enable
 				if(hw_mult_enable.read() == true){
 					next_state.write(EXECUTE);
@@ -31,18 +30,18 @@ void dh_hw_mult::fsm_transition()
 			
 			//not sure if this should contain anything or just drop in load in?	
 			case EXECUTE:				
-				cout<<"EXECUTE transition"<<endl;
+				//cout<<"EXECUTE transition"<<endl;
 				next_state.write(LOAD_IN);								
 				break;
 			
 			case LOAD_IN:			
-				cout<<"LOAD_IN transition"<<endl;
+				//cout<<"LOAD_IN transition"<<endl;
 				next_state.write(SELECT);
 				break;
 			
 			//Do some stuff with the mulitplexors
 			case SELECT:						
-				cout<<"SELECT transition"<<endl;
+				//cout<<"SELECT transition"<<endl;
 				if(a_LTE.read()==SC_LOGIC_0 &&	t_LTE.read()==SC_LOGIC_0){
 					//next_mux_state.write(A0T0);
 					next_state.write(A0T0);
@@ -67,19 +66,19 @@ void dh_hw_mult::fsm_transition()
 			case A0T1:
 			case A1T0:
 			case A1T1:
-				cout<<"MUX STATE transition"<<endl;
+				//cout<<"MUX STATE transition"<<endl;
 				next_state.write(LOAD_OUT);
 				break;
 			
 			//wait for the output registers to be enabled
 			case LOAD_OUT:			
-				cout<<"LOAD_OUT"<<endl;
+				//cout<<"LOAD_OUT"<<endl;
 				next_state.write(OUTPUT);
 				break;
 			
 			//wait for software to deassert the enable	
 			case OUTPUT:			
-				cout<<"OUTPUT transition" <<endl;
+				//cout<<"OUTPUT transition" <<endl;
 				if(hw_mult_enable.read()==false){
 					next_state.write(FINISH);
 				}
@@ -87,7 +86,7 @@ void dh_hw_mult::fsm_transition()
 			
 			//wait for hardware to deassert done
 			case FINISH:
-				cout<<"FINISH transition"<<endl;
+				//cout<<"FINISH transition"<<endl;
 				next_state.write(WAIT);
 				break;
 				
@@ -122,16 +121,16 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case LOAD_IN:
-				cout<<"LOAD_IN output"<<endl;				
-				cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
+				//cout<<"LOAD_IN output"<<endl;				
+				//cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
 				
 				//cout<<"t+u: "<< t_plus_u<< " u: "<<u<<endl;
 				break;
 
 			case SELECT:
-				cout<<"SELECT output"<<endl;	
-				cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
-				cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
+				//cout<<"SELECT output"<<endl;	
+				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
+				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
 				/*switch(mux_state.read()){
 					case A0T0:
 						cout<<"A0T0"<<endl;
@@ -160,35 +159,35 @@ void dh_hw_mult::fsm_out()
 				break;
 				
 			case A0T0:
-						cout<<"A0T0"<<endl;
+						//cout<<"A0T0"<<endl;
 						tmux_sel.write(SC_LOGIC_0);
 						amux_sel.write(SC_LOGIC_0);
 						break;
 					case A0T1:
-						cout<<"A0T1"<<endl;
+						//cout<<"A0T1"<<endl;
 						amux_sel.write(SC_LOGIC_0);
 						tmux_sel.write(SC_LOGIC_1);
 						break;
 					case A1T0:
-						cout<<"A1T0"<<endl;
+						//cout<<"A1T0"<<endl;
 						amux_sel.write(SC_LOGIC_1);
 						tmux_sel.write(SC_LOGIC_0);
 						break;
 					case A1T1:
-						cout<<"A1T1"<<endl;
+						//cout<<"A1T1"<<endl;
 						amux_sel.write(SC_LOGIC_1);
 						tmux_sel.write(SC_LOGIC_1);
 						break;
 
 			case LOAD_OUT:
-				cout<<"LOAD_OUT output"<<endl;
+				//cout<<"LOAD_OUT output"<<endl;
 				//cout<<"data out low: "<<out_data_low<<endl;
 				reg_load_out_enable.write(SC_LOGIC_1);
 				break;
 
 			case OUTPUT:
-				cout<<"OUTPUT output"<<endl;				
-				cout<<"data out low: "<<out_data_low.read()<<endl;
+				//cout<<"OUTPUT output"<<endl;				
+				//cout<<"data out low: "<<out_data_low.read()<<endl;
 				//cout<<"t shifted up: "<<t_shifted_up<<endl;
 				//cout<<"t plus alow: "<<t_plus_alow<<endl;
 				//reg_load_out_enable.write(SC_LOGIC_1);
@@ -197,7 +196,7 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case FINISH:
-				cout<<"finish output"<<endl;
+				//cout<<"finish output"<<endl;
 				hw_mult_done.write(false);
 				//clean everything up
 				//reset.write(true);

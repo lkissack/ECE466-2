@@ -32,7 +32,8 @@ int sc_main(int argc , char *argv[])
 	DH_HW_MULT.hw_mult_done (done);		// hardware done
 	DH_HW_MULT.hw_clock(clock);
 
-	sc_start(200, SC_NS);
+	//sc_start(200, SC_NS);
+	sc_start();
 
 	return(0);
 }

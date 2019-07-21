@@ -23,7 +23,7 @@ SC_MODULE(lk_register) {
 			}
 			else{
 				output.write(input.read());
-				cout << "Reg: " << input.read()<<endl;
+				//cout << "Reg: " << input.read()<<endl;
 			}
 			wait();
 		}
