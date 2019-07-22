@@ -24,7 +24,8 @@ void dh_hw_mult::fsm_transition()
 				//cout<<"WAIT transition"<<endl;
 				//Software asserts enable
 				if(hw_mult_enable.read() == true){
-					next_state.write(EXECUTE);
+					//next_state.write(EXECUTE);
+					next_state.write(LOAD_IN);
 				}
 				break;
 			
@@ -41,7 +42,7 @@ void dh_hw_mult::fsm_transition()
 			
 			//Do some stuff with the mulitplexors
 			case SELECT:
-			{
+			/*{
 				sc_logic a_IN = a_LTE.read();
 				sc_logic t_IN = t_LTE.read();						
 				//cout<<"SELECT transition"<<endl;
@@ -62,7 +63,7 @@ void dh_hw_mult::fsm_transition()
 					next_state.write(A1T1);
 				}
 			
-				//next_state.write(LOAD_OUT);
+				next_state.write(LOAD_OUT);
 				break;
 				}//BRACKETS FOR SWITCH SO VARIABLES CAN BE DEFINED
 				
@@ -71,6 +72,7 @@ void dh_hw_mult::fsm_transition()
 			case A1T0:
 			case A1T1:
 				//cout<<"MUX STATE transition"<<endl;
+				*/
 				next_state.write(LOAD_OUT);
 				break;
 			
@@ -118,7 +120,7 @@ void dh_hw_mult::fsm_out()
 				//reset.write(false);
 				//don't do anything				
 				break;
-
+			//skipping this state for now
 			case EXECUTE:
 				//perform multiplication
 				reg_load_in_enable.write(SC_LOGIC_1);				
@@ -127,15 +129,35 @@ void dh_hw_mult::fsm_out()
 			case LOAD_IN:
 				//cout<<"LOAD_IN output"<<endl;				
 				//cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
-				
+				reg_load_in_enable.write(SC_LOGIC_1);
 				//cout<<"t+u: "<< t_plus_u<< " u: "<<u<<endl;
 				break;
 
-			case SELECT:
+			case SELECT:{
 				//cout<<"SELECT output"<<endl;	
 				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
 				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
-				break;
+				sc_logic a_IN = a_LTE.read();
+				sc_logic t_IN = t_LTE.read();						
+				//cout<<"SELECT transition"<<endl;
+				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
+					tmux_sel.write(SC_LOGIC_0);
+					amux_sel.write(SC_LOGIC_0);
+				}
+				else if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_1){
+					amux_sel.write(SC_LOGIC_0);
+					tmux_sel.write(SC_LOGIC_1);
+				}
+				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_0){
+					amux_sel.write(SC_LOGIC_1);
+					tmux_sel.write(SC_LOGIC_0);
+				}
+				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
+					amux_sel.write(SC_LOGIC_1);
+					tmux_sel.write(SC_LOGIC_1);
+				}
+
+				break;}
 				
 			case A0T0:
 				//cout<<"A0T0"<<endl;
