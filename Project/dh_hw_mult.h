@@ -199,9 +199,9 @@ SC_MODULE (dh_hw_mult)
 		SC_METHOD(fsm_transition);
 		//Sensitive to state, enable, done, comparator results
 		//sensitive << state << hw_mult_enable<< hw_mult_done<<a_GT << a_LTE<< t_GT<< t_LTE;
-		sensitive << state <<hw_mult_enable<<hw_mult_done;
+		sensitive << state <<hw_mult_enable<<a_LTE<<t_LTE;//remove hw_mul_done, since module generates that itself
 		SC_METHOD(fsm_out);
-    		sensitive << state <<a_LTE<<t_LTE;
+    		sensitive << state ;
  	}
   
 };
