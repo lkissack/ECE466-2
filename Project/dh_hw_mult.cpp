@@ -42,7 +42,7 @@ void dh_hw_mult::fsm_transition()
 			
 			//Do some stuff with the mulitplexors
 			case SELECT:
-			/*{
+			{
 				sc_logic a_IN = a_LTE.read();
 				sc_logic t_IN = t_LTE.read();						
 				//cout<<"SELECT transition"<<endl;
@@ -107,13 +107,12 @@ void dh_hw_mult::fsm_transition()
 void dh_hw_mult::fsm_out()
 {	
 	//perform default activities
-	//tmux_sel.write(SC_LOGIC_0);
-	//amux_sel.write(SC_LOGIC_0);
+	tmux_sel.write(SC_LOGIC_0);
+	amux_sel.write(SC_LOGIC_0);
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
+	hw_mult_done.write(false);
 	
-	
-
 		switch(state.read()){
 			case WAIT:
 				//make sure reset is false
