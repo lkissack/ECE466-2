@@ -5,11 +5,8 @@
 
 void dh_hw_mult::fsm()
 {
-	while(1){
-	//add some condition for a reset
-		//cout<<"FSM"<<endl;		
+	while(1){	
 		state.write(next_state.read());
-		//mux_state.write(next_mux_state.read());
 		wait();
 	}
 }
@@ -18,14 +15,13 @@ void dh_hw_mult::fsm_transition()
 {
 	//cout<<"FSM TRANSITION"<<endl;
 		next_state.write(state.read());
-		//next_mux_state.write(mux_state.read());
 		switch(state.read()){
 			case WAIT:
 				//cout<<"WAIT transition"<<endl;
 				//Software asserts enable
 				if(hw_mult_enable.read() == true){
-					//next_state.write(EXECUTE);
-					next_state.write(LOAD_IN);
+					next_state.write(EXECUTE);
+					//next_state.write(LOAD_IN);
 				}
 				break;
 			
@@ -38,32 +34,27 @@ void dh_hw_mult::fsm_transition()
 			case LOAD_IN:			
 				//cout<<"LOAD_IN transition"<<endl;
 				next_state.write(SELECT);
-				break;
-			
-			//Do some stuff with the mulitplexors
+							
+				break;				
+					
 			case SELECT:
 			{
 				sc_logic a_IN = a_LTE.read();
 				sc_logic t_IN = t_LTE.read();						
 				//cout<<"SELECT transition"<<endl;
 				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
-					//next_mux_state.write(A0T0);
 					next_state.write(A0T0);
 				}
 				else if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_1){
-					//next_mux_state.write(A0T1);
 					next_state.write(A0T1);
 				}
 				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_0){
-					//next_mux_state.write(A1T0);
 					next_state.write(A1T0);
 				}
 				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
-					//next_mux_state.write(A1T1);
 					next_state.write(A1T1);
 				}
 			
-				next_state.write(LOAD_OUT);
 				break;
 				}//BRACKETS FOR SWITCH SO VARIABLES CAN BE DEFINED
 				
@@ -71,8 +62,7 @@ void dh_hw_mult::fsm_transition()
 			case A0T1:
 			case A1T0:
 			case A1T1:
-				//cout<<"MUX STATE transition"<<endl;
-				*/
+				
 				next_state.write(LOAD_OUT);
 				break;
 			
@@ -89,8 +79,7 @@ void dh_hw_mult::fsm_transition()
 					next_state.write(FINISH);
 				}
 				break;
-			
-			//wait for hardware to deassert done
+						
 			case FINISH:
 				//cout<<"FINISH transition"<<endl;
 				next_state.write(WAIT);
@@ -112,6 +101,7 @@ void dh_hw_mult::fsm_out()
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
 	hw_mult_done.write(false);
+	reset.write(false);
 	
 		switch(state.read()){
 			case WAIT:
@@ -119,7 +109,7 @@ void dh_hw_mult::fsm_out()
 				//reset.write(false);
 				//don't do anything				
 				break;
-			//skipping this state for now
+			
 			case EXECUTE:
 				//perform multiplication
 				reg_load_in_enable.write(SC_LOGIC_1);				
@@ -127,18 +117,13 @@ void dh_hw_mult::fsm_out()
 
 			case LOAD_IN:
 				//cout<<"LOAD_IN output"<<endl;				
-				//cout<<"b: "<< b_sig.read() << " c: " <<c_sig.read()<<endl;
-				reg_load_in_enable.write(SC_LOGIC_1);
-				//cout<<"t+u: "<< t_plus_u<< " u: "<<u<<endl;
+				//reg_load_in_enable.write(SC_LOGIC_1);
 				break;
 
 			case SELECT:{
 				//cout<<"SELECT output"<<endl;	
-				//cout<<"t + u: "<<t_plus_u<<" t shifted up:"<<t_shifted_up<<" a[0]: "<<alow<<" a[1]: "<<ahigh0<<" u: "<<u<<endl;
-				//cout<<"t_shifted_up plus alow: "<< t_plus_alow<<endl;
-				sc_logic a_IN = a_LTE.read();
-				sc_logic t_IN = t_LTE.read();						
-				//cout<<"SELECT transition"<<endl;
+				/*sc_logic a_IN = a_LTE.read();
+				sc_logic t_IN = t_LTE.read();	
 				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
 					tmux_sel.write(SC_LOGIC_0);
 					amux_sel.write(SC_LOGIC_0);
@@ -154,7 +139,7 @@ void dh_hw_mult::fsm_out()
 				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
 					amux_sel.write(SC_LOGIC_1);
 					tmux_sel.write(SC_LOGIC_1);
-				}
+				}*/
 
 				break;}
 				
@@ -181,18 +166,13 @@ void dh_hw_mult::fsm_out()
 
 			case LOAD_OUT:
 				//cout<<"LOAD_OUT output"<<endl;
-				//cout<<"data out low: "<<out_data_low<<endl;
 				reg_load_out_enable.write(SC_LOGIC_1);
 				break;
 
 			case OUTPUT:
-				//cout<<"OUTPUT output"<<endl;				
-				//cout<<"data out low: "<<out_data_low.read()<<endl;
-				//cout<<"t shifted up: "<<t_shifted_up<<endl;
-				//cout<<"t plus alow: "<<t_plus_alow<<endl;
-				//reg_load_out_enable.write(SC_LOGIC_1);
+				//cout<<"OUTPUT output"<<endl;		
 				hw_mult_done.write(true);
-				
+				//reg_load_out_enable.write(SC_LOGIC_1);
 				break;
 
 			case FINISH:
@@ -208,46 +188,5 @@ void dh_hw_mult::fsm_out()
 		}
 }
 
-void dh_hw_mult::temp_mult(){
 
-//ORIGINAL CODE
-	
-  NN_DIGIT a[2], b, c, t, u;
-  NN_HALF_DIGIT bHigh, bLow, cHigh, cLow;
-  
-    cout<<"Multiplication method"<<endl;
-	// Read inputs	
-	b = in_data_1.read();
-	c = in_data_2.read();
-		
-	// Original code from NN_DigitMult()...		
-  	bHigh = (NN_HALF_DIGIT)HIGH_HALF (b);
-  	bLow = (NN_HALF_DIGIT)LOW_HALF (b);
-  	cHigh = (NN_HALF_DIGIT)HIGH_HALF (c);
-  	cLow = (NN_HALF_DIGIT)LOW_HALF (c);
-
-  	a[0] = (NN_DIGIT)bLow * (NN_DIGIT)cLow;
-  	t = (NN_DIGIT)bLow * (NN_DIGIT)cHigh;
-  	u = (NN_DIGIT)bHigh * (NN_DIGIT)cLow;
-  	a[1] = (NN_DIGIT)bHigh * (NN_DIGIT)cHigh;
-  
-  	if ((t += u) < u) a[1] += TO_HIGH_HALF (1);
-  	u = TO_HIGH_HALF (t);
-  
-  	if ((a[0] += u) < u) a[1]++;
-  	a[1] += HIGH_HALF (t);
-	
-	// Write outputs
-	out_data_low.write(a[0]);
-	out_data_high.write(a[1]);
-
-	//Handled by other states
-	//hw_mult_done.write(true);
-	//wait for enable to deassert
-	/*while(hw_mult_enable.read() == true){
-		wait();
-	}
-	hw_mult_done.write(false);*/
-	  	  
-}
 
