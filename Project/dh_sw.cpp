@@ -366,6 +366,7 @@ NN_DIGIT c
 	//unsigned long mult = (long)b *(long)c;
 	//cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
 	
+	//output from software into hardware
     out_data_1.write(b);
     out_data_2.write(c);  
     hw_mult_enable.write(true);
@@ -375,6 +376,8 @@ NN_DIGIT c
 		wait();
 	}
     //cout<< "Hardware multiplication values generated."<<endl;
+    
+    //input from hardware into software
     a[0] = in_data_low.read();
     a[1] = in_data_high.read();
   

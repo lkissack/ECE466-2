@@ -94,9 +94,10 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case OUTPUT:
-				//cout<<"OUTPUT output"<<endl;		
+				cout<<"OUTPUT output"<<endl;		
 				hw_mult_done.write(true);
 				//reg_load_out_enable.write(SC_LOGIC_1);
+				
 				break;
 
 			case FINISH:
