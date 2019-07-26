@@ -133,8 +133,7 @@ SC_MODULE (dh_hw_mult)
 		tmux.sel(t_LTE);
 		tmux.out(tmux_out);
 		tmux.in(tmux_in);
-		tmux.clock(hw_clock);
-		
+				
 		/*tmux_shift.input(tmux_out);
 		//Not sure if this is a reasonable hardware module
 		tmux_shift.direction(left);
@@ -160,8 +159,7 @@ SC_MODULE (dh_hw_mult)
 		amux.sel(a_LTE);
 		amux.out(amux_out);
 		amux.in(amux_in);
-		amux.clock(hw_clock);
-
+		
 		add3.input1(ahigh1);
 		add3.input2(amux_out);
 		add3.output(ahigh2);

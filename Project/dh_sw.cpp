@@ -363,7 +363,7 @@ NN_DIGIT c
 )
 {
 //cout << "Digit Mult Function" << endl;
-//long mult = (long)b *(long)c;
+unsigned long mult = (long)b *(long)c;
 //cout << "Correct multiplication: 0x"<<std::hex<<mult<<std::dec<<endl;
     out_data_1.write(b);
     out_data_2.write(c);  
@@ -386,6 +386,12 @@ NN_DIGIT c
 	//cout <<"Hardware multiplication finished"<<endl;
 	//cout <<"________________________________"<<endl;
 	//cout<<"Results: 0x"<<std::hex<<a[1]<<a[0]<<std::dec<<endl;
+	NN_DIGIT ahigh = (NN_DIGIT)(mult>>32);
+	if (ahigh!=a[1]){
+		cout<<"MISMATCH"<<endl;
+		cout<<"Mult: "<<std::hex<<ahigh<<" A[1]: "<<a[1]<<std::dec<<endl;
+	}
+
    
 }
 
