@@ -20,27 +20,23 @@ void dh_hw_mult::fsm_transition()
 				//cout<<"WAIT transition"<<endl;
 				//Software asserts enable
 				if(hw_mult_enable.read() == true){
-					next_state.write(EXECUTE);
-					//next_state.write(LOAD_IN);
+					
+					next_state.write(LOAD_IN);
 				}
 				break;
 				
-			case EXECUTE:				
-				//cout<<"EXECUTE transition"<<endl;
-				next_state.write(LOAD_IN);								
-				break;
-			
-			case LOAD_IN:			
-				//cout<<"LOAD_IN transition"<<endl;
-				next_state.write(SELECT);
-							
-				break;				
-					
-			case SELECT:			
-				next_state.write(LOAD_OUT);
-				break;
+			case LOAD_IN:
+				//cout<<"LOAD_IN transition"<<endl;				
 				
+				next_state.write(EXECUTE);								
+				break;
 			
+			case EXECUTE:			
+				//cout<<"EXECUTE transition"<<endl;
+				next_state.write(LOAD_OUT);
+							
+				break;	
+					
 			//wait for the output registers to be enabled
 			case LOAD_OUT:			
 				//cout<<"LOAD_OUT"<<endl;
@@ -83,18 +79,14 @@ void dh_hw_mult::fsm_out()
 				//don't do anything				
 				break;
 			
-			case EXECUTE:
-				//perform multiplication
-				reg_load_in_enable.write(SC_LOGIC_1);				
-				break;
-
 			case LOAD_IN:
-				//cout<<"LOAD_IN output"<<endl;		
-				break;
+				//cout<<"LOAD_IN output"<<endl;
+				reg_load_in_enable.write(SC_LOGIC_1);		
+				break;			
 
-			case SELECT:
-				//cout<<"SELECT output"<<endl;					
-				break;
+			case EXECUTE:
+				//perform multiplication								
+				break;			
 				
 			case LOAD_OUT:
 				//cout<<"LOAD_OUT output"<<endl;

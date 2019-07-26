@@ -13,7 +13,7 @@
 #ifndef _DH_HW_MULT_H_
 #define _DH_HW_MULT_H_ 1
 
-enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT,A0T0, A0T1, A1T0, A1T1, LOAD_OUT, OUTPUT, FINISH};
+enum ctrl_state {WAIT, LOAD_IN, EXECUTE, LOAD_OUT, OUTPUT, FINISH};
 
 SC_MODULE (dh_hw_mult)
 {
@@ -48,7 +48,6 @@ SC_MODULE (dh_hw_mult)
 	sc_signal <NN_DIGIT> t1;
 	sc_signal <NN_DIGIT> t1_down, t1_up;
 	sc_signal <NN_DIGIT> tmux_out, amux_out;
-	//sc_signal <NN_DIGIT> tmux_shifted; 
 	
 	//Reset signal not used for anything
 	sc_signal <bool> reset;
@@ -57,7 +56,6 @@ SC_MODULE (dh_hw_mult)
 	sc_signal <sc_logic> a_GT, a_LTE, t_GT, t_LTE;
 	
 	sc_signal <NN_DIGIT> tmux_in, amux_in;
-	//sc_signal <sc_logic> tmux_sel, amux_sel;
 	sc_signal <bool> left, right;
 
 	//Method responsible for output of FSM (reg_load_in/out, hw_mult_done)
@@ -182,7 +180,6 @@ SC_MODULE (dh_hw_mult)
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
 		SC_METHOD(fsm_transition);
-		//Sensitive to state, enable, done
 		sensitive << state << hw_mult_enable;
 		SC_METHOD(fsm_out);
     		sensitive << state ;
