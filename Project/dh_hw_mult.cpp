@@ -39,7 +39,7 @@ void dh_hw_mult::fsm_transition()
 					
 			case SELECT:
 			{
-				sc_logic a_IN = a_LTE.read();
+				/*sc_logic a_IN = a_LTE.read();
 				sc_logic t_IN = t_LTE.read();						
 				//cout<<"SELECT transition"<<endl;
 				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
@@ -56,6 +56,8 @@ void dh_hw_mult::fsm_transition()
 				}
 			
 				break;
+				*/
+				next_state.write(LOAD_OUT);
 				}//BRACKETS FOR SWITCH SO VARIABLES CAN BE DEFINED
 				
 			case A0T0:
@@ -143,6 +145,7 @@ void dh_hw_mult::fsm_out()
 
 				break;}
 				
+			//This entire area is skipped
 			case A0T0:
 				//cout<<"A0T0"<<endl;
 				tmux_sel.write(SC_LOGIC_0);
