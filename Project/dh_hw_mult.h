@@ -130,7 +130,7 @@ SC_MODULE (dh_hw_mult)
 		comp0.GT(t_GT);
 		comp0.LTE(t_LTE);
 
-		tmux.sel(tmux_sel);
+		tmux.sel(t_LTE);
 		tmux.out(tmux_out);
 		tmux.in(tmux_in);
 		tmux.clock(hw_clock);
@@ -157,7 +157,7 @@ SC_MODULE (dh_hw_mult)
 		comp1.GT(a_GT);
 		comp1.LTE(a_LTE);
 		
-		amux.sel(amux_sel);
+		amux.sel(a_LTE);
 		amux.out(amux_out);
 		amux.in(amux_in);
 		amux.clock(hw_clock);
