@@ -24,8 +24,7 @@ void dh_hw_mult::fsm_transition()
 					//next_state.write(LOAD_IN);
 				}
 				break;
-			
-			//not sure if this should contain anything or just drop in load in?	
+				
 			case EXECUTE:				
 				//cout<<"EXECUTE transition"<<endl;
 				next_state.write(LOAD_IN);								
@@ -37,36 +36,10 @@ void dh_hw_mult::fsm_transition()
 							
 				break;				
 					
-			case SELECT:
-			{
-				/*sc_logic a_IN = a_LTE.read();
-				sc_logic t_IN = t_LTE.read();						
-				//cout<<"SELECT transition"<<endl;
-				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
-					next_state.write(A0T0);
-				}
-				else if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_1){
-					next_state.write(A0T1);
-				}
-				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_0){
-					next_state.write(A1T0);
-				}
-				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
-					next_state.write(A1T1);
-				}
-			
-				break;
-				*/
-				next_state.write(LOAD_OUT);
-				}//BRACKETS FOR SWITCH SO VARIABLES CAN BE DEFINED
-				
-			case A0T0:
-			case A0T1:
-			case A1T0:
-			case A1T1:
-				
+			case SELECT:			
 				next_state.write(LOAD_OUT);
 				break;
+				
 			
 			//wait for the output registers to be enabled
 			case LOAD_OUT:			
@@ -98,8 +71,6 @@ void dh_hw_mult::fsm_transition()
 void dh_hw_mult::fsm_out()
 {	
 	//perform default activities
-	tmux_sel.write(SC_LOGIC_0);
-	amux_sel.write(SC_LOGIC_0);
 	reg_load_in_enable.write(SC_LOGIC_0);
 	reg_load_out_enable.write(SC_LOGIC_0);
 	hw_mult_done.write(false);
@@ -118,55 +89,13 @@ void dh_hw_mult::fsm_out()
 				break;
 
 			case LOAD_IN:
-				//cout<<"LOAD_IN output"<<endl;				
-				//reg_load_in_enable.write(SC_LOGIC_1);
+				//cout<<"LOAD_IN output"<<endl;		
 				break;
 
-			case SELECT:{
-				//cout<<"SELECT output"<<endl;	
-				/*sc_logic a_IN = a_LTE.read();
-				sc_logic t_IN = t_LTE.read();	
-				if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_0){
-					tmux_sel.write(SC_LOGIC_0);
-					amux_sel.write(SC_LOGIC_0);
-				}
-				else if(a_IN==SC_LOGIC_0 &&	t_IN==SC_LOGIC_1){
-					amux_sel.write(SC_LOGIC_0);
-					tmux_sel.write(SC_LOGIC_1);
-				}
-				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_0){
-					amux_sel.write(SC_LOGIC_1);
-					tmux_sel.write(SC_LOGIC_0);
-				}
-				else if(a_IN==SC_LOGIC_1 &&	t_IN==SC_LOGIC_1){
-					amux_sel.write(SC_LOGIC_1);
-					tmux_sel.write(SC_LOGIC_1);
-				}*/
-
-				break;}
+			case SELECT:
+				//cout<<"SELECT output"<<endl;					
+				break;
 				
-			//This entire area is skipped
-			case A0T0:
-				//cout<<"A0T0"<<endl;
-				tmux_sel.write(SC_LOGIC_0);
-				amux_sel.write(SC_LOGIC_0);
-				break;
-			case A0T1:
-				//cout<<"A0T1"<<endl;
-				amux_sel.write(SC_LOGIC_0);
-				tmux_sel.write(SC_LOGIC_1);
-				break;
-			case A1T0:
-				//cout<<"A1T0"<<endl;
-				amux_sel.write(SC_LOGIC_1);
-				tmux_sel.write(SC_LOGIC_0);
-				break;
-			case A1T1:
-				//cout<<"A1T1"<<endl;
-				amux_sel.write(SC_LOGIC_1);
-				tmux_sel.write(SC_LOGIC_1);
-				break;
-
 			case LOAD_OUT:
 				//cout<<"LOAD_OUT output"<<endl;
 				reg_load_out_enable.write(SC_LOGIC_1);

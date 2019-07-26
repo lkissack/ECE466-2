@@ -14,35 +14,30 @@
 #define _DH_HW_MULT_H_ 1
 
 enum ctrl_state {WAIT, EXECUTE, LOAD_IN, SELECT,A0T0, A0T1, A1T0, A1T1, LOAD_OUT, OUTPUT, FINISH};
-//enum ctrl_mux_state {A0T0, A0T1, A1T0, A1T1};
 
 SC_MODULE (dh_hw_mult)
 {
+	//Signals to be conencted in dhdemo.cpp
 	sc_in<bool> hw_mult_enable; 
 	sc_in<NN_DIGIT> in_data_1;
 	sc_in<NN_DIGIT> in_data_2; 
 	sc_out<NN_DIGIT> out_data_low;
 	sc_out<NN_DIGIT> out_data_high;
 	sc_out<bool> hw_mult_done;
-
 	sc_in_clk hw_clock;
 
 	sc_signal<ctrl_state> state, next_state;
-	//sc_signal<ctrl_mux_state> mux_state, next_mux_state;
 
-	//lk_datapath datapath;
-	//Content required for data path
 	lk_register b_reg, c_reg, alow_reg, ahigh_reg;
 	lk_splitter b_split, c_split;
+
 	//blow*chigh corresponds to mult 0b01
 	lk_multiplier mult0, mult1, mult2, mult3;
 
 	lk_adder add0, add1, add2, add3, add4;
-	lk_lessthan comp0, comp1;
-	//multiplexors probably need a clock	
+	lk_lessthan comp0, comp1;	
 	lk_mux tmux, amux;
 	lk_shift t_shift_up, t_shift_down;
-	//lk_shift tmux_shift;
 
 	sc_signal <NN_DIGIT> b_sig, c_sig;
 	//Splitter signals
@@ -55,26 +50,24 @@ SC_MODULE (dh_hw_mult)
 	sc_signal <NN_DIGIT> tmux_out, amux_out;
 	//sc_signal <NN_DIGIT> tmux_shifted; 
 	
-	//internal to hw_mult module - does not need to interact with demo
+	//Reset signal not used for anything
 	sc_signal <bool> reset;
 	sc_signal <sc_logic> reg_load_in_enable;
 	sc_signal <sc_logic> reg_load_out_enable;
 	sc_signal <sc_logic> a_GT, a_LTE, t_GT, t_LTE;
 	
 	sc_signal <NN_DIGIT> tmux_in, amux_in;
-	sc_signal <sc_logic> tmux_sel, amux_sel;
+	//sc_signal <sc_logic> tmux_sel, amux_sel;
 	sc_signal <bool> left, right;
 
+	//Method responsible for output of FSM (reg_load_in/out, hw_mult_done)
   	void fsm_out();
 
-	//function that simulates datapath - might need to be a thread for wait()s
-
+	//Clock thread that changes the state of the FSM to the next state
 	void fsm();
 	
+	//Method responsible for setting the next state of the FSM
 	void fsm_transition();
-
-	//temporary function that performs original software multiplication
-	void temp_mult();
   
   	SC_CTOR (dh_hw_mult): 	b_reg("b_reg"), c_reg("c_reg"), alow_reg("alow_reg"), ahigh_reg("ahigh_reg"),
   				b_split("b_split"), c_split("c_split"),
@@ -82,7 +75,7 @@ SC_MODULE (dh_hw_mult)
 				add0("add0"), add1("add1"),add2("add2"),add3("add3"),add4("add4"),
 				comp0("comp0"), comp1("comp1"),
 				tmux("tmux"), amux("amux"),
-				t_shift_up("t_shift_up"), t_shift_down("t_shift_down")//,tmux_shift("tmux_shift")
+				t_shift_up("t_shift_up"), t_shift_down("t_shift_down")
   	{ 
 		b_reg.input(in_data_1);
 		b_reg.output(b_sig);
@@ -133,11 +126,6 @@ SC_MODULE (dh_hw_mult)
 		tmux.sel(t_LTE);
 		tmux.out(tmux_out);
 		tmux.in(tmux_in);
-				
-		/*tmux_shift.input(tmux_out);
-		//Not sure if this is a reasonable hardware module
-		tmux_shift.direction(left);
-		tmux_shift.output(tmux_shifted);*/
 
 		add1.input1(ahigh0);
 		add1.input2(tmux_out);
@@ -191,13 +179,11 @@ SC_MODULE (dh_hw_mult)
 		reset.write(false);
 		tmux_in = 1<<16;
 		amux_in = 1;
-		//need to figure out clocks on adders and such
 
 		SC_CTHREAD (fsm, hw_clock.pos());	
 		SC_METHOD(fsm_transition);
-		//Sensitive to state, enable, done, comparator results
-		//sensitive << state << hw_mult_enable<< hw_mult_done<<a_GT << a_LTE<< t_GT<< t_LTE;
-		sensitive << state <<hw_mult_enable << a_LTE << t_LTE;//remove hw_mul_done, since module generates that itself
+		//Sensitive to state, enable, done
+		sensitive << state << hw_mult_enable;
 		SC_METHOD(fsm_out);
     		sensitive << state ;
  	}
